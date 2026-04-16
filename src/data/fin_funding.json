@@ -1,0 +1,2322 @@
+{
+     "AERIAL_LOOP_COIL": [
+        {
+            "guid": "717419e0-d70b-4a22-a0ea-8dfd927cefb8",
+            "geometry": {
+                "x": -91.42037114471825,
+                "y": 44.7925094482461,
+                "z_elevation": 24.5,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "AERIAL_LOOP_COIL:1",
+            "name_as": "7POLE(LOOP)",
+            "name_ab": "",
+            "exchange": "Hallie",
+            "serving_area": "CO",
+            "sheet": "1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.893000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DTSS-LC001",
+                "sensor_name": "Loop-7-Strain-Monitor",
+                "sensor_type": "Distributed Temperature & Strain"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:7",
+                "slack_length_ft": 50,
+                "associated_cable": "FIBER_DIST:7"
+            }
+        },
+        {
+            "guid": "76306447-b29e-4c07-b6ce-1f3801c6ff50",
+            "geometry": {
+                "x": -91.43100899694372,
+                "y": 44.79408317503337,
+                "z_elevation": 22.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "AERIAL_LOOP_COIL:2",
+            "name_as": "11POLE(LOOP)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "5",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.893000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DTSS-LC002",
+                "sensor_name": "Loop-11-Strain-Monitor",
+                "sensor_type": "Distributed Temperature & Strain"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:11",
+                "slack_length_ft": 100,
+                "associated_cable": "FIBER_DIST:2"
+            }
+        }
+    ],
+     "ANCHOR": [
+        {
+            "guid": "63494e6c-9617-48ba-bcce-a77937307c52",
+            "geometry": {
+                "x": -91.43033408171537,
+                "y": 44.79396572815796,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:1",
+            "name_as": "10POLE(ANC)",
+            "name_ab": "",
+            "exchange": "Truax",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC001",
+                "sensor_name": "Anchor-10-Tension",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:10",
+                "guy_wire_count": 1,
+                "target_tension_lbf": 1200
+            }
+        },
+        {
+            "guid": "7b55fe03-b2c1-487f-a291-d15db25880f4",
+            "geometry": {
+                "x": -91.43100899694372,
+                "y": 44.79408317503337,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:2",
+            "name_as": "11POLE(ANC)",
+            "name_ab": "",
+            "exchange": "Hallie",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC002",
+                "sensor_name": "Anchor-11-Tension",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:11",
+                "guy_wire_count": 2,
+                "target_tension_lbf": 2400
+            }
+        },
+        {
+            "guid": "fd4a8f64-43c3-45a1-819c-415a0e45cc1d",
+            "geometry": {
+                "x": -91.42131960244065,
+                "y": 44.792485777604895,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:3",
+            "name_as": "6POLE(ANC)1",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "Maintenance",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC003",
+                "sensor_name": "Anchor-6-Tension-A",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:6",
+                "guy_wire_count": 1,
+                "target_tension_lbf": 1500
+            }
+        },
+        {
+            "guid": "70d7d808-0c6c-4341-9a1b-f14472ec031b",
+            "geometry": {
+                "x": -91.42131960244065,
+                "y": 44.792485777604895,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:4",
+            "name_as": "6POLE(ANC)2",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC004",
+                "sensor_name": "Anchor-6-Tension-B",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:6",
+                "guy_wire_count": 1,
+                "target_tension_lbf": 1500
+            }
+        },
+        {
+            "guid": "831b3546-aa5e-44f7-a02f-d1140e2e7656",
+            "geometry": {
+                "x": -91.41429578306426,
+                "y": 44.79268539909619,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:5",
+            "name_as": "17POLE(ANC)",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC005",
+                "sensor_name": "Anchor-17-Tension",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:17",
+                "guy_wire_count": 1,
+                "target_tension_lbf": 1200
+            }
+        },
+        {
+            "guid": "8560847f-f2dc-4dc5-9e79-8b869a12e6d7",
+            "geometry": {
+                "x": -91.42701566820904,
+                "y": 44.793408229582276,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:6",
+            "name_as": "2POLE(ANC)",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC006",
+                "sensor_name": "Anchor-2-Tension",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:2",
+                "guy_wire_count": 2,
+                "target_tension_lbf": 2400
+            }
+        },
+        {
+            "guid": "811d47bd-798d-4e44-8235-fe3559d32c3b",
+            "geometry": {
+                "x": -91.42500616601757,
+                "y": 44.79311010820563,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "ANCHOR:7",
+            "name_as": "3POLE(ANC)",
+            "name_ab": "",
+            "exchange": "Truax",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.674000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access",
+            "sensor_metadata": {
+                "sensor_uid": "SN-STR-ANC007",
+                "sensor_name": "Anchor-3-Tension",
+                "sensor_type": "Strain Gauge"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:3",
+                "guy_wire_count": 1,
+                "target_tension_lbf": 1200
+            }
+        }
+    ],
+        "CONDUIT": [
+        {
+            "guid": "db048e0b-0c7a-4db6-ac60-f54ce131f7f6",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4210720837278, 44.7908025997775, -3.5],
+                        [-91.4210910601072, 44.7906329832794, -3.5],
+                        [-91.4211653438149, 44.7906027688853, -3.8]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "CONDUIT:1",
+            "name_as": "1C",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 84,
+            "updated": "2025-08-21T00:46:59.565000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BFOV(1-1.25)",
+                    "value_ab": null,
+                    "qty_as": 88,
+                    "qty_ab": 86,
+                    "date_ab": "2024-09-04T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Trench",
+            "sensor_metadata": {
+                "sensor_uid": "SN-HYD-C001",
+                "sensor_name": "Trench-1-Pressure-Monitor",
+                "sensor_type": "Hydrostatic Pressure Sensor"
+            },
+            "connectivity_logic": {
+                "contained_cables": ["FIBER_DIST:3"],
+                "duct_utilization_pct": 45,
+                "innerduct_count": 3
+            }
+        },
+        {
+            "guid": "5bf8a005-c359-4877-b899-a5a9e656e0f7",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4190214960616, 44.7901705550003, -4.2],
+                        [-91.4192889978679, 44.7901433650872, -4.2]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "CONDUIT:2",
+            "name_as": "2C",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 70,
+            "updated": "2025-08-21T00:46:59.565000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BFOV(1-1.25)",
+                    "value_ab": null,
+                    "qty_as": 74,
+                    "qty_ab": 64,
+                    "date_ab": "2024-09-10T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Trench",
+            "sensor_metadata": {
+                "sensor_uid": "SN-HYD-C002",
+                "sensor_name": "Trench-2-Pressure-Monitor",
+                "sensor_type": "Hydrostatic Pressure Sensor"
+            },
+            "connectivity_logic": {
+                "contained_cables": ["FIBER_DIST:4"],
+                "duct_utilization_pct": 30,
+                "innerduct_count": 2
+            }
+        },
+        {
+            "guid": "cf8e5df1-8de0-4770-b1f4-62ca6961fc3e",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.421743413517, 44.7908011484146, -3.8],
+                        [-91.4217814283363, 44.7906039593863, -3.8]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "CONDUIT:3",
+            "name_as": "3C",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 72,
+            "updated": "2025-08-21T00:46:59.565000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BFOV(1-1.25)",
+                    "value_ab": null,
+                    "qty_as": 78,
+                    "qty_ab": 94,
+                    "date_ab": "2024-09-04T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ],
+            "lifecycle_state": "Under Maintenance",
+            "security_label": "High-Criticality-Trench",
+            "sensor_metadata": {
+                "sensor_uid": "SN-HYD-C003",
+                "sensor_name": "Trench-3-Pressure-Monitor",
+                "sensor_type": "Hydrostatic Pressure Sensor"
+            },
+            "connectivity_logic": {
+                "contained_cables": ["FIBER_DIST:5"],
+                "duct_utilization_pct": 80,
+                "innerduct_count": 4
+            }
+        },
+        {
+            "guid": "155f74e0-263b-4f53-9d93-897eea277407",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4224409990384, 44.7908291067396, -4.0],
+                        [-91.4224479934475, 44.7908100067603, -4.0],
+                        [-91.422429972252, 44.7906265561102, -4.1]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "CONDUIT:4",
+            "name_as": "4C",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 74,
+            "updated": "2025-08-21T00:46:59.565000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BFOV(1-1.25)",
+                    "value_ab": null,
+                    "qty_as": 78,
+                    "qty_ab": 74,
+                    "date_ab": "2024-09-04T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Trench",
+            "sensor_metadata": {
+                "sensor_uid": "SN-HYD-C004",
+                "sensor_name": "Trench-4-Pressure-Monitor"
+            },
+            "connectivity_logic": {
+                "contained_cables": ["FIBER_DIST:6"],
+                "duct_utilization_pct": 20
+            }
+        },
+        {
+            "guid": "473abc40-5f7b-4a7b-949e-ff61506d3716",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4214521894644, 44.7923209422037, -4.5],
+                        [-91.4214219335231, 44.7923183480523, -4.5],
+                        [-91.4208208868497, 44.792163997201, -4.5],
+                        [-91.4206073243999, 44.7921641378756, -4.5],
+                        [-91.4206052840819, 44.7915413352152, -4.5],
+                        [-91.4206047059889, 44.7913668669989, -4.5],
+                        [-91.4206195990386, 44.7913583490619, -4.5]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "CONDUIT:5",
+            "name_as": "5C",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 524,
+            "updated": "2025-08-21T00:46:59.565000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality-Trench",
+            "sensor_metadata": {
+                "sensor_uid": "SN-HYD-C005",
+                "sensor_name": "Trench-5-Pressure-Monitor"
+            },
+            "connectivity_logic": {
+                "contained_cables": ["FIBER_DIST:1", "FIBER_DIST:8"],
+                "duct_utilization_pct": 95
+            }
+        }
+    ],
+      "EQUIPMENT": [
+        {
+            "guid": "f11155a1-8a67-444c-bf63-aa0a704742da",
+            "geometry": {
+                "x": -91.42545660357482,
+                "y": 44.79292437663165,
+                "z_elevation": 5.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "EQUIPMENT:1",
+            "name_as": "CO",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 1 SHEET 01",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.455000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Critical-Infrastructure-Tier-1",
+            "sensor_metadata": {
+                "sensor_uid": "SN-PWR-CO001",
+                "sensor_name": "CO-Main-Power-Monitor",
+                "sensor_type": "Smart Power Meter",
+                "monitoring_frequency": "Real-time"
+            },
+            "connectivity_logic": {
+                "location": "Rack-A1-Slot-04",
+                "upstream_uplink": "AGG-SWITCH-01",
+                "downstream_feeders": ["FIBER_DIST:1", "FIBER_DIST:2"],
+                "active_port_count": 48
+            }
+        }
+    ],
+     "FIBER_DIST": [
+        {
+            "guid": "b5610c03-dbec-4113-8de2-a090898aca77",
+            "rid": "FIBER_DIST:1",
+            "name_as": "1F",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-1-Core",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4254225871021, 44.792934932823, -4.5],
+                        [-91.4250803353696, 44.7928892012397, -4.5],
+                        [-91.4249975868615, 44.7930977988144, -4.8]
+                    ]
+                ],
+                "burial_depth_ft": 4.5,
+                "spatialReference": { "wkid": 4326 }
+            },
+            "logical_inventory": {
+                "cable_model": "High-Density Feeder",
+                "total_strands": 144,
+                "active_strands": 112,
+                "available_strands": 32
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-OTDR-F001",
+                "sensor_name": "Feeder-1-OTDR-Monitor",
+                "sensor_type": "Optical Time Domain Reflectometer",
+                "last_scan_status": "Optimal"
+            },
+            "units": [
+                {
+                    "value_as": "BFO144i",
+                    "qty_as": 242,
+                    "date_ab": "2024-09-17T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ]
+        },
+        {
+            "guid": "3fdaefe7-1260-463d-82ee-525db5eff277",
+            "rid": "FIBER_DIST:2",
+            "name_as": "2F",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-1-Core",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4249975868615, 44.7930977988144, 35.0],
+                        [-91.4237987298037, 44.7929084962087, 34.5],
+                        [-91.4225335970726, 44.7926910920771, 35.0],
+                        [-91.421405774908, 44.792493186626, 35.0]
+                    ]
+                ],
+                "placement": "Aerial"
+            },
+            "logical_inventory": {
+                "total_strands": 144,
+                "active_strands": 80,
+                "available_strands": 64
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-OTDR-F002",
+                "sensor_name": "Feeder-2-OTDR-Monitor"
+            },
+            "units": [
+                {
+                    "value_as": "CFO144",
+                    "qty_as": 1326,
+                    "date_ab": "2024-09-17T23:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ]
+        },
+        {
+            "guid": "3bfb1021-5913-4fb1-899e-aef186b4da4c",
+            "rid": "FIBER_DIST:3",
+            "name_as": "8F",
+            "lifecycle_state": "In-Service",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4210720837278, 44.7908025997775, -4.0],
+                        [-91.4211653438149, 44.7906027688853, -4.0]
+                    ]
+                ]
+            },
+            "logical_inventory": { "total_strands": 12, "available_strands": 2 },
+            "sensor_metadata": { "sensor_uid": "SN-OTDR-F003", "sensor_name": "Local-Feeder-8-OTDR" },
+            "units": [
+                {
+                    "value_as": "BFO12i",
+                    "qty_as": 118,
+                    "date_ab": "2024-09-25T01:00:00+00:00",
+                    "con": "MR X_GRANT"
+                }
+            ]
+        },
+        {
+            "guid": "20aa3114-9b0d-4369-9f22-347b8fe2a222",
+            "rid": "FIBER_DIST:4",
+            "name_as": "13F",
+            "lifecycle_state": "In-Service",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4190214960616, 44.7901705550003, -3.5],
+                        [-91.4192889978679, 44.7901433650872, -3.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-OTDR-F004", "sensor_name": "Local-Feeder-13-OTDR" },
+            "units": [{ "value_as": "BFO12i", "qty_as": 104, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "d08035d6-b262-454b-a944-2f34db0e35c4",
+            "rid": "FIBER_DIST:5",
+            "name_as": "17F",
+            "lifecycle_state": "In-Service",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.421743413517, 44.7908011484146, -3.8],
+                        [-91.4217814283363, 44.7906039593863, -3.8]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-OTDR-F005", "sensor_name": "Local-Feeder-17-OTDR" },
+            "units": [{ "value_as": "BFO12i", "qty_as": 106, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "473a5386-bff2-4873-a151-ce0414794a37",
+            "rid": "FIBER_DIST:40",
+            "name_as": "72F",
+            "lifecycle_state": "In-Service",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4297815077986, 44.7928253277935, 30.0],
+                        [-91.4291151273471, 44.7928294334778, 30.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-OTDR-F040", "sensor_name": "Sector-72-OTDR" },
+            "units": [{ "value_as": "BFO48", "qty_as": 130, "con": "B TEAM_GRANT" }]
+        }
+    ],
+     "FIBER_DROP": [
+        {
+            "guid": "c3711531-ce1d-497f-ad8f-9473e7e94927",
+            "rid": "FIBER_DROP:1",
+            "name_as": "1D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "security_label": "Standard-Access",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4237293896512, 44.7916847981631, 28.5], 
+                        [-91.4238684200598, 44.7918874815602, 27.2],
+                        [-91.4243239925111, 44.7924852637948, 15.0]
+                    ]
+                ],
+                "spatialReference": { "wkid": 4326 }
+            },
+            "connectivity_logic": {
+                "origin_guid": "071d5af2-4144-4ee4-b9f6-8d5faa597502", 
+                "termination_guid": "NID-GUID-B1",
+                "assigned_strand": "Blue-01"
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-D001",
+                "sensor_name": "Drop-1-Acoustic",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "units": [
+                {
+                    "value_as": "SEBO12",
+                    "qty_as": 514,
+                    "con": "MR X_GRANT",
+                    "min_clearance_ft": 18.5
+                }
+            ]
+        },
+        {
+            "guid": "f1bb138b-3a47-4f46-8d0c-f0ada7272163",
+            "rid": "FIBER_DROP:2",
+            "name_as": "2D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.422886472616, 44.7914609896386, -3.5],
+                        [-91.4228079626583, 44.7917387833443, -3.8],
+                        [-91.422835133413, 44.7921198501729, -4.0]
+                    ]
+                ],
+                "burial_depth_ft": 3.5,
+                "spatialReference": { "wkid": 4326 }
+            },
+            "connectivity_logic": {
+                "origin_guid": "PED-GUID-X12",
+                "termination_guid": "NID-GUID-B2",
+                "assigned_strand": "Orange-04"
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-D002",
+                "sensor_name": "Drop-2-Acoustic"
+            },
+            "units": [
+                {
+                    "value_as": "SEBO12",
+                    "qty_as": 278,
+                    "con": "MR X_GRANT"
+                }
+            ]
+        },
+        {
+            "guid": "0d2ab4d5-aa37-40db-b0f2-1a3a3b6c34f8",
+            "rid": "FIBER_DROP:3",
+            "name_as": "3D",
+            "lifecycle_state": "Under Maintenance",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4214521894644, 44.7923209422037, -3.0],
+                        [-91.4218555317859, 44.7922332787205, -3.2]
+                    ]
+                ],
+                "burial_depth_ft": 3.0
+            },
+            "connectivity_logic": {
+                "origin_guid": "PED-GUID-Y55",
+                "termination_guid": "NID-GUID-B3"
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-D003",
+                "sensor_name": "Drop-3-Acoustic"
+            },
+            "units": [
+                {
+                    "value_as": "SEBO4",
+                    "qty_as": 146,
+                    "qty_ab": 138,
+                    "date_ab": "2024-09-03",
+                    "con": "MR X_GRANT"
+                }
+            ]
+        },
+        {
+            "guid": "442ad010-1c36-4a1c-8ac8-7acb962ad4c1",
+            "rid": "FIBER_DROP:4",
+            "name_as": "4D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4214521894644, 44.7923209422037, 30.0],
+                        [-91.4208858420709, 44.7920697372869, 14.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D004", "sensor_name": "Drop-4-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 220, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "a380387d-a0a7-43d1-94a0-d6c3e9e61dde",
+            "rid": "FIBER_DROP:5",
+            "name_as": "5D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4206195990386, 44.7913583490619, -4.5],
+                        [-91.4208539147793, 44.7914509698697, -4.2]
+                    ]
+                ],
+                "burial_depth_ft": 4.5
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D005", "sensor_name": "Drop-5-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 120, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "b353d3e9-589b-49e7-acc4-9a4aa48ca150",
+            "rid": "FIBER_DROP:6",
+            "name_as": "6D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4206195990386, 44.7913583490619, 32.0],
+                        [-91.4207850121704, 44.7911988062052, 12.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D006", "sensor_name": "Drop-6-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 120, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "6cb2fa0a-257a-4517-9d31-ef1a31b1f1ca",
+            "rid": "FIBER_DROP:7",
+            "name_as": "7D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4203553431973, 44.791111316515, -3.2],
+                        [-91.420150529845, 44.7912364782411, -3.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D007", "sensor_name": "Drop-7-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 114, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "61edecd3-0f77-40aa-b799-c12052c5601c",
+            "rid": "FIBER_DROP:8",
+            "name_as": "10D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4211653438149, 44.7906027688853, -4.0],
+                        [-91.4211377957403, 44.7904041173773, -4.2],
+                        [-91.4209635835435, 44.7904702528417, -4.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D008", "sensor_name": "Drop-10-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 162, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "eafba85e-1f1e-4a4d-a7f3-4794abdf4e8a",
+            "rid": "FIBER_DROP:9",
+            "name_as": "11D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4211653438149, 44.7906027688853, 35.0],
+                        [-91.4212934303443, 44.7904542348402, 15.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D009", "sensor_name": "Drop-11-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 164, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "0e65ed51-0ec6-48f8-9134-8c1725448e18",
+            "rid": "FIBER_DROP:10",
+            "name_as": "12D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4224409990384, 44.7908291067396, -3.5],
+                        [-91.4222254704531, 44.7909575907434, -3.8]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D010", "sensor_name": "Drop-12-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 120, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "3f5f4967-0bb6-45f5-87da-533ed4127400",
+            "rid": "FIBER_DROP:11",
+            "name_as": "13D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.421743413517, 44.7908011484146, -3.0],
+                        [-91.4218694474541, 44.7909292873222, -3.2]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D011", "sensor_name": "Drop-13-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 90, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "9ab5ce7d-9ec8-414c-be94-4d4d27166901",
+            "rid": "FIBER_DROP:12",
+            "name_as": "14D",
+            "lifecycle_state": "Planned",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.421743413517, 44.7908011484146, 30.0],
+                        [-91.4215857134864, 44.7909506856405, 14.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D012", "sensor_name": "Drop-14-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 106, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "d27fb7fc-c567-438b-ab8f-b94904840c6d",
+            "rid": "FIBER_DROP:13",
+            "name_as": "15D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4210720837278, 44.7908025997775, -3.5],
+                        [-91.4212342372708, 44.7909372069174, -3.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D013", "sensor_name": "Drop-15-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 90, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "0fd7cf4f-db5f-4991-af11-e259a528de39",
+            "rid": "FIBER_DROP:14",
+            "name_as": "16D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4210720837278, 44.7908025997775, -4.0],
+                        [-91.4208823949151, 44.7909088469728, -4.2]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D014", "sensor_name": "Drop-16-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 104, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "29abf785-ac4c-45e3-8389-8c3dd5e978f2",
+            "rid": "FIBER_DROP:15",
+            "name_as": "17D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.422429972252, 44.7906265561102, -3.0],
+                        [-91.4226747640055, 44.7905292877393, -3.1]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D015", "sensor_name": "Drop-17-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 124, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "9c85cc52-bd99-4749-95ad-181453ef21b2",
+            "rid": "FIBER_DROP:16",
+            "name_as": "18D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4204793926939, 44.7906005605956, 30.0],
+                        [-91.4202988321455, 44.79046662777, 15.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D016", "sensor_name": "Drop-18-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 92, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "6ca34c3b-ab18-45e6-9a51-8e4b1cd43ea1",
+            "rid": "FIBER_DROP:17",
+            "name_as": "19D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4198465685106, 44.7906316206537, -3.5],
+                        [-91.4199939849957, 44.7904793549567, -3.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D017", "sensor_name": "Drop-19-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 108, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "d065d5a4-9eb1-4dd2-8cfd-26cf04d1148c",
+            "rid": "FIBER_DROP:18",
+            "name_as": "20D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4198465685106, 44.7906316206537, -3.0],
+                        [-91.4196192643814, 44.7905405788409, -3.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D018", "sensor_name": "Drop-20-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 114, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "96d7d63b-4923-4ab4-a547-ee2e3811bde4",
+            "rid": "FIBER_DROP:19",
+            "name_as": "21D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4198840983472, 44.7908266940532, 28.0],
+                        [-91.4201224712588, 44.7909451045609, 14.5]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D019", "sensor_name": "Drop-21-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 124, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "0dc1e0b0-828b-484e-9a34-814962073221",
+            "rid": "FIBER_DROP:20",
+            "name_as": "22D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Buried",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4204793926939, 44.7906005605956, -4.0],
+                        [-91.4206374028219, 44.7904653858941, -4.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D020", "sensor_name": "Drop-22-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 110, "con": "MR X_GRANT" }]
+        },
+        {
+            "guid": "45361905-5c98-4778-ab6c-0eae12de97ba",
+            "rid": "FIBER_DROP:21",
+            "name_as": "23D",
+            "lifecycle_state": "In-Service",
+            "placement_type": "Aerial",
+            "geometry": {
+                "paths": [
+                    [
+                        [-91.4217814283363, 44.7906039593863, 33.0],
+                        [-91.4216572222328, 44.7904586296092, 13.0]
+                    ]
+                ]
+            },
+            "sensor_metadata": { "sensor_uid": "SN-DAS-D021", "sensor_name": "Drop-23-Acoustic" },
+            "units": [{ "value_as": "SEBO4", "qty_as": 104, "con": "MR X_GRANT" }]
+        }
+    ],
+     "HANDHOLE": [
+        {
+            "guid": "77353de7-5d58-4968-943e-8c24226b3b4f",
+            "geometry": {
+                "x": -91.42499758686154,
+                "y": 44.79309779881443,
+                "z_depth_ft": -3.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "HANDHOLE:1",
+            "name_as": "01",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.205000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                { "number": 1, "value_as": "BHF(30x48x36)T", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-08-29T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 2, "value_as": "BM2(5/8)(8)", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-08-29T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 5, "value_as": "HBFO(M)", "qty_as": 1, "qty_ab": 0, "con": "SPLICER Y_GRANT" }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Underground",
+            "sensor_metadata": {
+                "sensor_uid": "SN-GAS-HH001",
+                "sensor_name": "HH-01-Safety-Monitor",
+                "sensor_type": "Multi-Gas & Water Level"
+            },
+            "connectivity_logic": {
+                "contained_conduits": ["CONDUIT:1", "CONDUIT:4"],
+                "vault_type": "Pre-cast Concrete",
+                "lid_status": "Locked"
+            }
+        },
+        {
+            "guid": "58e9c75e-b6ae-4b54-a73e-4f4fc8367a6e",
+            "geometry": {
+                "x": -91.42061502682263,
+                "y": 44.79079348329173,
+                "z_depth_ft": -3.5,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "HANDHOLE:2",
+            "name_as": "05",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.205000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                { "number": 1, "value_as": "BHF(30x48x36)T", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-09-04T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 2, "value_as": "BM2(5/8)(8)", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-09-04T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 4, "value_as": "HO1", "qty_as": 40, "qty_ab": 40, "date_ab": "2024-10-03T23:00:00+00:00", "con": "SPLICER Y_GRANT" },
+                { "number": 5, "value_as": "HBFO(M)", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-10-03T23:00:00+00:00", "con": "SPLICER Y_GRANT" }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality-Vault",
+            "sensor_metadata": {
+                "sensor_uid": "SN-GAS-HH002",
+                "sensor_name": "HH-05-Safety-Monitor",
+                "sensor_type": "Multi-Gas & Water Level"
+            },
+            "connectivity_logic": {
+                "contained_conduits": ["CONDUIT:5"],
+                "vault_type": "Polymer Concrete"
+            }
+        },
+        {
+            "guid": "32a38126-3b73-4e19-b99c-70bb905a3ce9",
+            "geometry": {
+                "x": -91.41924434119608,
+                "y": 44.79090413619415,
+                "z_depth_ft": -3.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "HANDHOLE:3",
+            "name_as": "07",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.205000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                { "number": 1, "value_as": "BHF(30x48x36)T", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-09-05T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 2, "value_as": "BM2(5/8)(8)", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-09-05T00:00:00+00:00", "con": "MR X_GRANT" },
+                { "number": 4, "value_as": "HO1", "qty_as": 57, "qty_ab": 57, "date_ab": "2024-10-07T00:00:00+00:00", "con": "SPLICER Y_GRANT" },
+                { "number": 5, "value_as": "HBFO(M)", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-10-07T00:00:00+00:00", "con": "SPLICER Y_GRANT" }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Underground",
+            "sensor_metadata": {
+                "sensor_uid": "SN-GAS-HH003",
+                "sensor_name": "HH-07-Safety-Monitor"
+            },
+            "connectivity_logic": {
+                "contained_conduits": ["CONDUIT:10"]
+            }
+        },
+        {
+            "guid": "b75549e8-d5fa-43f4-9f88-a4459e9ed64b",
+            "geometry": {
+                "x": -91.42542258710206,
+                "y": 44.79293493282301,
+                "z_depth_ft": -5.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "HANDHOLE:4",
+            "name_as": "VAULT",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.205000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                { "number": 1, "value_as": "WBHF", "qty_as": 1, "qty_ab": 1, "date_ab": "2024-08-28T00:00:00+00:00", "con": "MR X_GRANT" }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Critical-Exchange-Vault",
+            "sensor_metadata": {
+                "sensor_uid": "SN-GAS-HH004",
+                "sensor_name": "VAULT-Safety-Monitor",
+                "sensor_type": "Multi-Gas & Water Level"
+            },
+            "connectivity_logic": {
+                "contained_conduits": ["CONDUIT:1", "CONDUIT:5", "CONDUIT:11"],
+                "vault_type": "Concrete Vault"
+            }
+        },
+        {
+            "guid": "a2e783bf-ef1a-4a75-8918-2e3fc9226f7b",
+            "geometry": {
+                "x": -91.42688395565865,
+                "y": 44.791154308448455,
+                "z_depth_ft": -3.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "rid": "HANDHOLE:8",
+            "name_as": "06",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:58.205000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                { "number": 1, "value_as": "BHF(30x48x36)T", "qty_as": 1, "qty_ab": 0, "con": "B TEAM_GRANT" },
+                { "number": 2, "value_as": "BM2(5/8)(8)", "qty_as": 1, "qty_ab": 0, "con": "B TEAM_GRANT" },
+                { "number": 4, "value_as": "HO1", "qty_as": 126, "qty_ab": 0, "con": "SPLICER Y_GRANT" },
+                { "number": 5, "value_as": "HBFO(M)", "qty_as": 1, "qty_ab": 0, "con": "SPLICER Y_GRANT" }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Underground",
+            "sensor_metadata": {
+                "sensor_uid": "SN-GAS-HH008",
+                "sensor_name": "HH-06-Safety-Monitor"
+            },
+            "connectivity_logic": {
+                "contained_conduits": ["CONDUIT:15", "CONDUIT:21"]
+            }
+        }
+    ],
+     "PEDESTAL": [
+        {
+            "guid": "0831b3f8-8e3e-49ac-8277-d9f522f806a5",
+            "geometry": {
+                "x": -91.42145218946445,
+                "y": 44.79232094220373,
+                "z_elevation": 0.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "PEDESTAL:1",
+            "name_as": "03",
+            "name_ab": "",
+            "exchange": "Hallie",
+            "serving_area": "CO",
+            "sheet": "Line 5",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.768000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BDO5",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-08-29T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 2,
+                    "value_as": "BM2(5/8)(8)",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-08-29T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 4,
+                    "value_as": "HO1",
+                    "value_ab": null,
+                    "qty_as": 2,
+                    "qty_ab": 2,
+                    "date_ab": "2024-10-02T00:00:00+00:00",
+                    "con": "SPLICER Y_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-ENV-PED001",
+                "sensor_name": "Pedestal-1-Flood-Monitor",
+                "sensor_type": "Moisture/Intrusion Sensor"
+            },
+            "connectivity_logic": {
+                "upstream_splice_case": "SPLICE_CASE:3",
+                "downstream_nids": ["NID:10", "NID:11"],
+                "internal_patch_ports": 12
+            }
+        },
+        {
+            "guid": "19f3a3dc-d419-4a33-be72-982364886634",
+            "geometry": {
+                "x": -91.42061959903857,
+                "y": 44.791358349061916,
+                "z_elevation": 0.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "PEDESTAL:2",
+            "name_as": "04",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.768000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BDO5",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-02T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 2,
+                    "value_as": "BM2(5/8)(8)",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-02T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 4,
+                    "value_as": "HO1",
+                    "value_ab": null,
+                    "qty_as": 2,
+                    "qty_ab": 2,
+                    "date_ab": "2024-10-02T00:00:00+00:00",
+                    "con": "SPLICER Y_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-ENV-PED002",
+                "sensor_name": "Pedestal-2-Flood-Monitor",
+                "sensor_type": "Moisture/Intrusion Sensor"
+            },
+            "connectivity_logic": {
+                "upstream_splice_case": "SPLICE_CASE:4",
+                "downstream_nids": ["NID:12"],
+                "internal_patch_ports": 6
+            }
+        },
+        {
+            "guid": "a522defd-fb5c-4d93-9cd6-7be981b737db",
+            "geometry": {
+                "x": -91.42035534319734,
+                "y": 44.791111316515,
+                "z_elevation": 0.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "PEDESTAL:3",
+            "name_as": "04-1",
+            "name_ab": "",
+            "exchange": "Truax",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.768000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BDO5",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-02T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 2,
+                    "value_as": "BM2(5/8)(8)",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-02T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 4,
+                    "value_as": "HO1",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-10-02T00:00:00+00:00",
+                    "con": "SPLICER Y_GRANT"
+                }
+            ],
+            "lifecycle_state": "Maintenance",
+            "security_label": "High-Criticality-Junction",
+            "sensor_metadata": {
+                "sensor_uid": "SN-ENV-PED003",
+                "sensor_name": "Pedestal-3-Flood-Monitor",
+                "sensor_type": "Moisture/Intrusion Sensor"
+            },
+            "connectivity_logic": {
+                "upstream_splice_case": "SPLICE_CASE:2",
+                "downstream_nids": ["NID:15"],
+                "internal_patch_ports": 12
+            }
+        },
+        {
+            "guid": "41ad3113-dd73-49a1-93c5-8cc1ebdff733",
+            "geometry": {
+                "x": -91.42107208372776,
+                "y": 44.790802599777464,
+                "z_elevation": 0.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "PEDESTAL:4",
+            "name_as": "01",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.768000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [
+                {
+                    "number": 1,
+                    "value_as": "BDO5",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-03T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 2,
+                    "value_as": "BM2(5/8)(8)",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 1,
+                    "date_ab": "2024-09-03T00:00:00+00:00",
+                    "con": "MR X_GRANT"
+                },
+                {
+                    "number": 4,
+                    "value_as": "HO1",
+                    "value_ab": null,
+                    "qty_as": 4,
+                    "qty_ab": 4,
+                    "date_ab": "2024-10-03T00:00:00+00:00",
+                    "con": "SPLICER Y_GRANT"
+                }
+            ],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-ENV-PED004",
+                "sensor_name": "Pedestal-4-Flood-Monitor",
+                "sensor_type": "Moisture/Intrusion Sensor"
+            },
+            "connectivity_logic": {
+                "upstream_splice_case": "SPLICE_CASE:5",
+                "downstream_nids": ["NID:20", "NID:21"],
+                "internal_patch_ports": 24
+            }
+        }
+    ],
+      "POLE": [
+        {
+            "guid": "04a35965-6ca0-4ab5-88a9-44d9e377f0d2",
+            "rid": "POLE:1",
+            "name_as": "1POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42630651395545,
+                "y": 44.793327520777254,
+                "z_height": 35.5,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P001",
+                "sensor_name": "Pole-1-Tilt",
+                "sensor_type": "3-Axis Accelerometer",
+                "uom": "Degrees"
+            },
+            "units": [
+                {
+                    "number": 10,
+                    "value_as": "FO-T-DBL-(144)(96)",
+                    "value_ab": null,
+                    "qty_as": 1,
+                    "qty_ab": 0,
+                    "date_ab": null,
+                    "con": "MR X_GRANT",
+                    "bearing": 180,
+                    "mounting_height": 28.0
+                }
+            ]
+        },
+        {
+            "guid": "d427823d-36e7-4f93-aa53-c3f649a69bf6",
+            "rid": "POLE:2",
+            "name_as": "2POLE",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42701566820904,
+                "y": 44.793408229582276,
+                "z_height": 30.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P002",
+                "sensor_name": "Pole-2-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 3, "value_as": "PF3-5", "qty_as": 1, "con": "MR X_GRANT", "bearing": 90, "mounting_height": 24.5 },
+                { "number": 10, "value_as": "FO-T-(96)", "qty_as": 1, "con": "MR X_GRANT", "bearing": 270, "mounting_height": 22.0 }
+            ]
+        },
+        {
+            "guid": "ae348760-5f85-43ae-a435-1595066bacec",
+            "rid": "POLE:3",
+            "name_as": "3POLE",
+            "name_ab": "",
+            "exchange": "Hallie",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-3-Access",
+            "geometry": {
+                "x": -91.42500616601757,
+                "y": 44.79311010820563,
+                "z_height": 45.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P003",
+                "sensor_name": "Pole-3-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 3, "value_as": "PF3-5", "qty_ab": 1, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 0, "mounting_height": 38.0 },
+                { "number": 10, "value_as": "FO-DE-(144)", "qty_ab": 2, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 180, "mounting_height": 34.5 }
+            ]
+        },
+        {
+            "guid": "9afee07d-9f7e-41ef-9ced-56340df046f4",
+            "rid": "POLE:4",
+            "name_as": "4POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42379872980365,
+                "y": 44.79290849620871,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P004",
+                "sensor_name": "Pole-4-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-DBL-(144)(24)", "qty_ab": 1, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 225, "mounting_height": 26.5 }
+            ]
+        },
+        {
+            "guid": "8ddea91d-c772-486e-be4f-39dc775bc4e1",
+            "rid": "POLE:5",
+            "name_as": "5POLE",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.4225335970726,
+                "y": 44.79269109207715,
+                "z_height": 38.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P005",
+                "sensor_name": "Pole-5-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-DBL-(144)(24)", "qty_ab": 1, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 135, "mounting_height": 29.0 }
+            ]
+        },
+        {
+            "guid": "2548a897-71f9-4704-9c05-f86ed55a5bcc",
+            "rid": "POLE:6",
+            "name_as": "6POLE",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-1-Core",
+            "geometry": {
+                "x": -91.42131960244065,
+                "y": 44.792485777604895,
+                "z_height": 42.5,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P006",
+                "sensor_name": "Pole-6-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 3, "value_as": "PF3-5", "qty_ab": 2, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 0, "mounting_height": 35.0 },
+                { "number": 10, "value_as": "FO-TA-(24)", "qty_ab": 1, "date_ab": "2024-08-22T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 180, "mounting_height": 31.0 }
+            ]
+        },
+        {
+            "guid": "4c674c0d-f3fa-4719-b54f-88844dec0b20",
+            "rid": "POLE:7",
+            "name_as": "7POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 5",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42037114471825,
+                "y": 44.7925094482461,
+                "z_height": 33.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P007",
+                "sensor_name": "Pole-7-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 45, "mounting_height": 25.0 }
+            ]
+        },
+        {
+            "guid": "357142fa-39aa-4a5e-b06c-a15d0b43f1ef",
+            "rid": "POLE:8",
+            "name_as": "8POLE",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "Under Maintenance",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42818123983491,
+                "y": 44.7935990696584,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P008",
+                "sensor_name": "Pole-8-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(96)", "qty_as": 1, "con": "MR X_GRANT", "bearing": 0, "mounting_height": 27.5 }
+            ]
+        },
+        {
+            "guid": "00062259-9943-4932-ab27-ee56a1a5448a",
+            "rid": "POLE:9",
+            "name_as": "9POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.42932807424201,
+                "y": 44.79379811929016,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P009",
+                "sensor_name": "Pole-9-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(96)", "qty_as": 1, "con": "MR X_GRANT", "bearing": 315, "mounting_height": 28.0 }
+            ]
+        },
+        {
+            "guid": "dd298c5d-4821-4965-9ce3-94a082ba043a",
+            "rid": "POLE:10",
+            "name_as": "10POLE",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 4",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.43033408171537,
+                "y": 44.79396572815796,
+                "z_height": 40.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P010",
+                "sensor_name": "Pole-10-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(96)", "qty_as": 1, "con": "MR X_GRANT", "bearing": 180, "mounting_height": 32.0 },
+                { "number": 12, "value_as": "HO1", "qty_as": 1, "con": "MR X_GRANT", "bearing": 0, "mounting_height": 15.0 }
+            ]
+        },
+        {
+            "guid": "ddfe068f-9bf0-45f7-80d7-088ad14b25a7",
+            "rid": "POLE:11",
+            "name_as": "11POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-3-Access",
+            "geometry": {
+                "x": -91.43100899694372,
+                "y": 44.79408317503337,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P011",
+                "sensor_name": "Pole-11-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-DE-(96)", "qty_as": 1, "con": "MR X_GRANT", "bearing": 90, "mounting_height": 25.5 }
+            ]
+        },
+        {
+            "guid": "f4864dac-9963-4a6e-809f-4d5bc55307fc",
+            "rid": "POLE:12",
+            "name_as": "12POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.41951961559295,
+                "y": 44.79253350842308,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P012",
+                "sensor_name": "Pole-12-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 270, "mounting_height": 26.0 }
+            ]
+        },
+        {
+            "guid": "e382e5e5-f18c-4e37-927c-2e520f41bdf3",
+            "rid": "POLE:13",
+            "name_as": "13POLE",
+            "name_ab": "",
+            "exchange": "Eau Claire",
+            "serving_area": "CO",
+            "sheet": "Line 3",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.4183091064832,
+                "y": 44.792547320637965,
+                "z_height": 40.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P013",
+                "sensor_name": "Pole-13-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 180, "mounting_height": 31.5 }
+            ]
+        },
+        {
+            "guid": "b8b3ab54-9a29-4cae-84c9-b6a2a577d8ba",
+            "rid": "POLE:14",
+            "name_as": "14POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 2",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.41737133653541,
+                "y": 44.79260701955259,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P014",
+                "sensor_name": "Pole-14-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 90, "mounting_height": 26.0 }
+            ]
+        },
+        {
+            "guid": "c9d71282-67fe-4f62-851e-1097653e5b47",
+            "rid": "POLE:15",
+            "name_as": "15POLE",
+            "name_ab": "",
+            "exchange": "Seymour",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.41635622072073,
+                "y": 44.79260313036343,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P015",
+                "sensor_name": "Pole-15-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 0, "mounting_height": 28.5 }
+            ]
+        },
+        {
+            "guid": "0fa80d03-36eb-4fd5-b8fa-15d380a8e229",
+            "rid": "POLE:16",
+            "name_as": "16POLE",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-3-Access",
+            "geometry": {
+                "x": -91.41537247920057,
+                "y": 44.792642838402195,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P016",
+                "sensor_name": "Pole-16-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 10, "value_as": "FO-T-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 180, "mounting_height": 26.0 }
+            ]
+        },
+        {
+            "guid": "32a9b893-cbda-479f-957b-cb5a93834169",
+            "rid": "POLE:17",
+            "name_as": "17POLE",
+            "name_ab": "",
+            "exchange": "Fall Creek",
+            "serving_area": "CO",
+            "sheet": "Line 1",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.487000+00:00",
+            "updated_by": "arc.reporting",
+            "lifecycle_state": "In-Service",
+            "security_label": "Tier-2-Distribution",
+            "geometry": {
+                "x": -91.41429578306426,
+                "y": 44.79268539909619,
+                "z_height": 35.0,
+                "spatialReference": { "wkid": 4326, "latestWkid": 4326 }
+            },
+            "sensor_metadata": {
+                "sensor_uid": "SN-TLT-P017",
+                "sensor_name": "Pole-17-Tilt",
+                "sensor_type": "3-Axis Accelerometer"
+            },
+            "units": [
+                { "number": 3, "value_as": "PF3-5", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 90, "mounting_height": 27.5 },
+                { "number": 10, "value_as": "FO-DE-(24)", "qty_ab": 1, "date_ab": "2024-08-21T00:00:00+00:00", "con": "MR X_GRANT", "bearing": 270, "mounting_height": 24.0 }
+            ]
+        }
+    ],
+      "SPLICE_CASE": [
+        {
+            "guid": "071d5af2-4144-4ee4-b9f6-8d5faa597502",
+            "geometry": {
+                "x": -91.43033408171537,
+                "y": 44.79396572815796,
+                "z_elevation": 28.5,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "SPLICE_CASE:1",
+            "name_as": "10POLE(SC)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 7 SHEET 02",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:46:57.221000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality-Junction",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-SC001",
+                "sensor_name": "Junction-10-DAS",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:10",
+                "upstream_feeder_id": "FIBER_DIST:1",
+                "available_ports": 24
+            }
+        },
+        {
+            "guid": "a28f8d55-3341-4ee4-b9f6-8d5faa597502",
+            "geometry": {
+                "x": -91.42701566820904,
+                "y": 44.793408229582276,
+                "z_elevation": 30.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "SPLICE_CASE:2",
+            "name_as": "2POLE(SC)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 1 SHEET 05",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:48:12.112000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-SC002",
+                "sensor_name": "Junction-2-DAS",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:2",
+                "upstream_feeder_id": "FIBER_DIST:2",
+                "available_ports": 12
+            }
+        },
+        {
+            "guid": "e5348760-5f85-43ae-a435-1595066bacec",
+            "geometry": {
+                "x": -91.42500616601757,
+                "y": 44.79311010820563,
+                "z_elevation": 27.2,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "SPLICE_CASE:3",
+            "name_as": "3POLE(SC)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 4 SHEET 08",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:49:05.441000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "Maintenance",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-SC003",
+                "sensor_name": "Junction-3-DAS",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:3",
+                "upstream_feeder_id": "FIBER_DIST:3",
+                "available_ports": 48
+            }
+        },
+        {
+            "guid": "b9afee07-9f7e-41ef-9ced-56340df046f4",
+            "geometry": {
+                "x": -91.42379872980365,
+                "y": 44.79290849620871,
+                "z_elevation": 29.5,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "SPLICE_CASE:4",
+            "name_as": "4POLE(SC)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 2 SHEET 01",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:50:22.887000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "High-Criticality-Junction",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-SC004",
+                "sensor_name": "Junction-4-DAS",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:4",
+                "upstream_feeder_id": "FIBER_DIST:4",
+                "available_ports": 32
+            }
+        },
+        {
+            "guid": "c8ddea91-c772-486e-be4f-39dc775bc4e1",
+            "geometry": {
+                "x": -91.4225335970726,
+                "y": 44.79269109207715,
+                "z_elevation": 31.0,
+                "spatialReference": {
+                    "wkid": 4326,
+                    "latestWkid": 4326
+                }
+            },
+            "rid": "SPLICE_CASE:5",
+            "name_as": "5POLE(SC)",
+            "name_ab": "",
+            "exchange": null,
+            "serving_area": "CO",
+            "sheet": "LINE 4 SHEET 12",
+            "comment": null,
+            "route_mile": false,
+            "route_foot": 0,
+            "shape_length": 0,
+            "updated": "2025-08-21T00:51:15.992000+00:00",
+            "updated_by": "arc.reporting",
+            "units": [],
+            "lifecycle_state": "In-Service",
+            "security_label": "Standard-Access-Node",
+            "sensor_metadata": {
+                "sensor_uid": "SN-DAS-SC005",
+                "sensor_name": "Junction-5-DAS",
+                "sensor_type": "Distributed Acoustic Sensing"
+            },
+            "connectivity_logic": {
+                "parent_pole_rid": "POLE:5",
+                "upstream_feeder_id": "FIBER_DIST:5",
+                "available_ports": 16
+            }
+        }
+    ]
+
+}

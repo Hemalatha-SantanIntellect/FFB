@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { AssetHealthPanel } from '@/components/AssetHealthPanel'
 import { GeoMapPanel } from '@/components/GeoMapPanel'
+// In App.tsx
+import { GeoMapPanel2 } from './components/GeoMapPanel2'
 import { KPIStrip } from '@/components/KPIStrip'
 import { OperationalInfo } from '@/components/OperationalInfo'
 import { PriorityActions } from '@/components/PriorityActions'
@@ -88,12 +90,13 @@ export default function App() {
         />
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
-          <GeoMapPanel
+          {/* <GeoMapPanel
             assets={routeFilteredAssets}
             selectedAsset={selectedAsset}
             onSelectAsset={setSelectedAsset}
             routeScope={selectedRoute}
-          />
+          /> */}
+          <GeoMapPanel2 />
           <AssetHealthPanel />
         </div>
 
