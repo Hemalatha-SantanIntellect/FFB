@@ -1,0 +1,189 @@
+[
+  {
+    "sensor_uid": "SN-TLT-P001",
+    "sensor_name": "Pole-1-Tilt",
+    "sensor_type": "3-Axis Accelerometer",
+    "associated_layer": "POLE",
+    "defect_type": "Excessive Lean",
+    "threshold": 15,
+    "unit": "degrees",
+    "current_value": 18.2,
+    "criticality": "Critical"
+  },
+  {
+    "sensor_uid": "SN-TLT-P006",
+    "sensor_name": "Pole-6-Tilt",
+    "sensor_type": "3-Axis Accelerometer",
+    "associated_layer": "POLE",
+    "defect_type": "Impact Vibration",
+    "threshold": 2.5,
+    "unit": "G",
+    "current_value": 0.8,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-ENV-PED001",
+    "sensor_name": "Pedestal-1-Flood-Monitor",
+    "sensor_type": "Moisture/Intrusion Sensor",
+    "associated_layer": "PEDESTAL",
+    "defect_type": "Water Ingress",
+    "threshold": 2.0,
+    "unit": "inches",
+    "current_value": 2.5,
+    "criticality": "High"
+  },
+  {
+    "sensor_uid": "SN-ENV-PED003",
+    "sensor_name": "Pedestal-3-Flood-Monitor",
+    "sensor_type": "Moisture/Intrusion Sensor",
+    "associated_layer": "PEDESTAL",
+    "defect_type": "Enclosure Tamper",
+    "threshold": 1,
+    "unit": "binary_state",
+    "current_value": 1,
+    "criticality": "Critical"
+  },
+  {
+    "sensor_uid": "SN-HYD-C003",
+    "sensor_name": "Trench-3-Pressure-Monitor",
+    "sensor_type": "Hydrostatic Pressure Sensor",
+    "associated_layer": "CONDUIT",
+    "defect_type": "Structural Collapse",
+    "threshold": 45,
+    "unit": "PSI Drop",
+    "current_value": 12,
+    "criticality": "Medium"
+  },
+  {
+    "sensor_uid": "SN-HYD-C001",
+    "sensor_name": "Trench-1-Pressure-Monitor",
+    "sensor_type": "Hydrostatic Pressure Sensor",
+    "associated_layer": "CONDUIT",
+    "defect_type": "Internal Flooding",
+    "threshold": 85,
+    "unit": "percent_capacity",
+    "current_value": 40,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-OTDR-F001",
+    "sensor_name": "Feeder-1-OTDR-Monitor",
+    "sensor_type": "Optical Time Domain Reflectometer",
+    "associated_layer": "FIBER_DIST",
+    "defect_type": "Micro-bend Attenuation",
+    "threshold": 0.5,
+    "unit": "dB Loss",
+    "current_value": 0.62,
+    "criticality": "High"
+  },
+  {
+    "sensor_uid": "SN-OTDR-F040",
+    "sensor_name": "Sector-72-OTDR",
+    "sensor_type": "Optical Time Domain Reflectometer",
+    "associated_layer": "FIBER_DIST",
+    "defect_type": "Total Fiber Break",
+    "threshold": 100,
+    "unit": "dB_reflection",
+    "current_value": 5,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-DAS-D001",
+    "sensor_name": "Drop-1-Acoustic",
+    "sensor_type": "Distributed Acoustic Sensing",
+    "associated_layer": "FIBER_DROP",
+    "defect_type": "Third Party Excavation",
+    "threshold": 80,
+    "unit": "Hz",
+    "current_value": 85,
+    "criticality": "Critical"
+  },
+  {
+    "sensor_uid": "SN-DAS-D003",
+    "sensor_name": "Drop-3-Acoustic",
+    "sensor_type": "Distributed Acoustic Sensing",
+    "associated_layer": "FIBER_DROP",
+    "defect_type": "Cable Dragging",
+    "threshold": 120,
+    "unit": "Hz",
+    "current_value": 45,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-GAS-HH001",
+    "sensor_name": "HH-01-Safety-Monitor",
+    "sensor_type": "Multi-Gas & Water Level",
+    "associated_layer": "HANDHOLE",
+    "defect_type": "Methane Accumulation",
+    "threshold": 500,
+    "unit": "PPM",
+    "current_value": 550,
+    "criticality": "Critical"
+  },
+  {
+    "sensor_uid": "SN-GAS-HH004",
+    "sensor_name": "VAULT-Safety-Monitor",
+    "sensor_type": "Multi-Gas & Water Level",
+    "associated_layer": "HANDHOLE",
+    "defect_type": "Oxygen Deficiency",
+    "threshold": 19.5,
+    "unit": "percent_volume",
+    "current_value": 20.8,
+    "criticality": "Medium"
+  },
+  {
+    "sensor_uid": "SN-STR-ANC002",
+    "sensor_name": "Anchor-11-Tension",
+    "sensor_type": "Strain Gauge",
+    "associated_layer": "ANCHOR",
+    "defect_type": "Guy Wire Slack",
+    "threshold": 400,
+    "unit": "lbf_decrease",
+    "current_value": 150,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-STR-ANC006",
+    "sensor_name": "Anchor-2-Tension",
+    "sensor_type": "Strain Gauge",
+    "associated_layer": "ANCHOR",
+    "defect_type": "Over-Tension Stress",
+    "threshold": 3200,
+    "unit": "lbf_increase",
+    "current_value": 3450,
+    "criticality": "High"
+  },
+  {
+    "sensor_uid": "SN-PWR-CO001",
+    "sensor_name": "CO-Main-Power-Monitor",
+    "sensor_type": "Smart Power Meter",
+    "associated_layer": "EQUIPMENT",
+    "defect_type": "Voltage Sag",
+    "threshold": 95,
+    "unit": "V AC",
+    "current_value": 118,
+    "criticality": "Low"
+  },
+  {
+    "sensor_uid": "SN-DAS-SC001",
+    "sensor_name": "Junction-10-DAS",
+    "sensor_type": "Distributed Acoustic Sensing",
+    "associated_layer": "SPLICE_CASE",
+    "defect_type": "Splice Tray Displacement",
+    "threshold": 15,
+    "unit": "Hz freq shift",
+    "current_value": 18,
+    "criticality": "Medium"
+  },
+  {
+    "sensor_uid": "SN-DTSS-LC002",
+    "sensor_name": "Loop-11-Strain-Monitor",
+    "sensor_type": "Distributed Temperature & Strain",
+    "associated_layer": "AERIAL_LOOP_COIL",
+    "defect_type": "Thermal Expansion",
+    "threshold": 65,
+    "unit": "Celsius",
+    "current_value": 68,
+    "criticality": "High"
+  }
+]

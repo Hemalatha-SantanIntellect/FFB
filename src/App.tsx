@@ -19,6 +19,7 @@ import {
   type Asset,
 } from '@/data/mockData'
 import { filterAssetsByRoute } from '@/lib/assetFilters'
+import { SensorHealthStrip } from './components/SensorHealthStrip'
 
 function applySearch(assetsList: Asset[], q: string): Asset[] {
   const s = q.trim().toLowerCase()
@@ -88,6 +89,9 @@ export default function App() {
           criticalCount={fleetKpis.critical}
           alertCount={fleetKpis.alerts}
         />
+
+        {/* The new Sensor Health monitoring strip */}
+  <SensorHealthStrip />
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
           {/* <GeoMapPanel

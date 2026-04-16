@@ -72,7 +72,7 @@ export function GeoMapPanel2() {
   const mapRef = useRef<MapRef>(null)
   const [selectedAsset, setSelectedAsset] = useState<any>(null)
   const [iconsLoaded, setIconsLoaded] = useState(false)
-  const [currentStyle, setCurrentStyle] = useState(MAP_STYLES[0].url)
+  const [currentStyle, setCurrentStyle] = useState(MAP_STYLES[2].url)
   const [showStyleMenu, setShowStyleMenu] = useState(false)
   const [visibleCategories, setVisibleCategories] = useState<Set<string>>(new Set(Object.keys(ASSET_COLORS)))
 
@@ -146,9 +146,16 @@ export function GeoMapPanel2() {
       <div className="absolute left-4 top-4 z-10 w-56 rounded-xl border border-neutral-200 bg-white/95 p-3 shadow-xl backdrop-blur-md">
         <div className="mb-3 flex items-center justify-between border-b pb-2">
           <h4 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500">Asset Filters</h4>
+           <button 
+            onClick={() => setVisibleCategories(new Set())}
+            className="flex items-center gap-1 text-[9px] font-bold text-red-600 hover:text-red-800 cursor-pointer"
+          >
+            <EyeOff className="h-2.5 w-2.5" /> Hide All
+          </button>
+
           <button 
             onClick={() => setVisibleCategories(new Set(Object.keys(ASSET_COLORS)))}
-            className="flex items-center gap-1 text-[9px] font-bold text-blue-600 hover:text-blue-800"
+            className="flex items-center gap-1 text-[9px] font-bold text-blue-600 hover:text-blue-800 cursor-pointer"
           >
             <RotateCcw className="h-2.5 w-2.5" /> Reset
           </button>
@@ -161,7 +168,7 @@ export function GeoMapPanel2() {
                 key={type}
                 onClick={() => toggleCategory(type)}
                 className={cn(
-                  "flex w-full items-center justify-between rounded-md px-2 py-1.5 transition-all",
+                  "flex w-full items-center justify-between rounded-md px-2 py-1.5 transition-all cursor-pointer",
                   isActive ? "bg-transparent hover:bg-neutral-100" : "bg-neutral-50 opacity-40 grayscale"
                 )}
               >
