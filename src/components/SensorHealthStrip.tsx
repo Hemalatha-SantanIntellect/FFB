@@ -7,16 +7,19 @@ import {
   Zap, 
   Gauge, 
   MapPin,
-  Construction
+  Construction,
+  X,
+  Send,
+  CheckCircle2
 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
 // Data Imports
 import fundingData from '@/data/fin_funding.json'
-import sensorData from '@/data/fin_sensor.json' // Assuming you saved the sensor JSON here
+import sensorData from '@/data/fin_sensor.json'
 
 const CRITICALITY_THEMES = {
   Critical: 'border-l-rose-500 bg-rose-50/50 text-rose-700 icon-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
@@ -25,7 +28,6 @@ const CRITICALITY_THEMES = {
   Low: 'border-l-emerald-500 bg-emerald-50/50 text-emerald-700 icon-emerald-600',
 }
 
-// Map sensor types to appropriate icons
 const SENSOR_ICONS: Record<string, any> = {
   '3-Axis Accelerometer': Activity,
   'Moisture/Intrusion Sensor': Droplets,
@@ -39,13 +41,14 @@ const SENSOR_ICONS: Record<string, any> = {
 }
 
 export function SensorHealthStrip() {
-  // Merge Sensor Health with Funding Data to find GUID and Coordinates
+  const [reportingSensor, setReportingSensor] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
+
   const enrichedSensors = useMemo(() => {
     return sensorData.map((sensor) => {
       let assetInfo = { guid: 'N/A', lat: 0, lng: 0, rid: 'N/A' }
-      
-      // Look up in funding JSON based on associated_layer
-      const layerAssets = fundingData[sensor.associated_layer as keyof typeof fundingData] || []
+      const layerAssets = (fundingData as any)[sensor.associated_layer] || []
       const match = layerAssets.find((a: any) => a.sensor_metadata?.sensor_uid === sensor.sensor_uid)
 
       if (match) {
@@ -56,9 +59,31 @@ export function SensorHealthStrip() {
           rid: match.rid
         }
       }
-
       return { ...sensor, ...assetInfo }
     })
+  }, [])
+
+  const handleReportSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    
+    // Simulate API delay
+    setTimeout(() => {
+      setIsSubmitting(false)
+      setShowSuccess(true)
+      
+      // Auto-close modal after 2 seconds
+      setTimeout(() => {
+        setShowSuccess(false)
+        setReportingSensor(null)
+      }, 2200)
+    }, 1200)
+  }
+
+  const closeModal = useCallback(() => {
+    setReportingSensor(null)
+    setShowSuccess(false)
+    setIsSubmitting(false)
   }, [])
 
   return (
@@ -72,7 +97,7 @@ export function SensorHealthStrip() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {enrichedSensors.map((s, idx) => {
+        {enrichedSensors.map((s) => {
           const Icon = SENSOR_ICONS[s.sensor_type] || Activity
           const theme = CRITICALITY_THEMES[s.criticality as keyof typeof CRITICALITY_THEMES]
           
@@ -84,7 +109,6 @@ export function SensorHealthStrip() {
                 theme
               )}
             >
-              {/* Splash Effect on Hover */}
               <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.03] transition-all group-hover:scale-150" />
 
               <div className="relative z-10">
@@ -98,9 +122,18 @@ export function SensorHealthStrip() {
                       <p className="text-sm font-bold tracking-tight text-neutral-900 leading-none mt-0.5">{s.sensor_name}</p>
                     </div>
                   </div>
-                  <Badge className={cn("text-[9px] font-bold", s.criticality === 'Critical' ? "bg-rose-600" : "bg-neutral-800")}>
-                    {s.criticality}
-                  </Badge>
+                  
+                  <div className="flex flex-col items-end gap-1.5">
+                    <Badge className={cn("text-[9px] font-bold", s.criticality === 'Critical' ? "bg-rose-600 text-white" : "bg-neutral-800 text-white")}>
+                      {s.criticality}
+                    </Badge>
+                    <button 
+                      onClick={() => setReportingSensor(s)}
+                      className="text-[9px] font-bold text-neutral-500 underline decoration-dotted hover:text-neutral-900 transition-colors"
+                    >
+                      Report Incident
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2">
@@ -118,14 +151,6 @@ export function SensorHealthStrip() {
                   </div>
                 </div>
 
-                <div className="mt-3">
-                   <p className="text-[10px] font-bold text-neutral-600 flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3 text-amber-500" />
-                    DETECTION: <span className="text-neutral-900">{s.defect_type}</span>
-                  </p>
-                </div>
-
-                {/* Danger Zone / Location Data */}
                 <div className="mt-4 pt-3 border-t border-black/5">
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="font-bold text-rose-600 flex items-center gap-1">
@@ -145,6 +170,110 @@ export function SensorHealthStrip() {
           )
         })}
       </div>
+
+      {/* Incident Reporting Modal */}
+      {reportingSensor && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+            
+            {!showSuccess ? (
+              <>
+                {/* Modal Header */}
+                <div className="flex items-center justify-between bg-neutral-900 px-6 py-5 text-white">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full bg-rose-500 p-1.5 animate-pulse">
+                      <AlertTriangle className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-sm font-bold uppercase tracking-widest">Raise Incident</h2>
+                      <p className="text-[10px] text-neutral-400 font-mono">UID: {reportingSensor.sensor_uid}</p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={closeModal}
+                    className="rounded-full p-1 transition-colors hover:bg-white/10"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Modal Form */}
+                <form onSubmit={handleReportSubmit} className="p-6">
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Assigned To</label>
+                        <div className="rounded border bg-neutral-50 px-3 py-2 text-xs font-bold text-blue-600">
+                          Finley Admin
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Priority</label>
+                        <div className={cn(
+                          "rounded border px-3 py-2 text-xs font-bold text-center capitalize",
+                          reportingSensor.criticality === 'Critical' ? "bg-rose-50 text-rose-700 border-rose-100" : "bg-amber-50 text-amber-700 border-amber-100"
+                        )}>
+                          {reportingSensor.criticality}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Target Asset GUID</label>
+                      <div className="rounded border bg-neutral-50 px-3 py-2 text-[11px] font-mono text-neutral-700 truncate">
+                        {reportingSensor.guid}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Issue Summary</label>
+                      <textarea 
+                        required
+                        className="w-full rounded border border-neutral-200 p-3 text-xs leading-relaxed text-neutral-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        rows={4}
+                        defaultValue={`System Detection: ${reportingSensor.defect_type}. \nAsset: ${reportingSensor.sensor_name} shows an out-of-bounds value of ${reportingSensor.current_value} ${reportingSensor.unit}.`}
+                      />
+                    </div>
+
+                    <div className="pt-2">
+                      <button 
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
+                      >
+                        {isSubmitting ? (
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4" />
+                            SUBMIT INCIDENT
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </>
+            ) : (
+              /* Success View */
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-in zoom-in-90 duration-300">
+                <div className="mb-4 rounded-full bg-emerald-100 p-4 text-emerald-600 ring-8 ring-emerald-50">
+                  <CheckCircle2 className="h-12 w-12" />
+                </div>
+                <h2 className="text-xl font-bold text-neutral-900">Incident Reported</h2>
+                <p className="mt-2 text-sm text-neutral-500">
+                  The ticket for <span className="font-bold text-neutral-700">{reportingSensor.sensor_uid}</span> has been dispatched to <span className="font-semibold text-blue-600">Finley Admin</span>.
+                </p>
+                <div className="mt-8 flex items-center gap-2">
+                  <div className="h-1.5 w-12 rounded-full bg-emerald-500" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-neutral-200" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-neutral-200" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -20,6 +20,7 @@ import {
 } from '@/data/mockData'
 import { filterAssetsByRoute } from '@/lib/assetFilters'
 import { SensorHealthStrip } from './components/SensorHealthStrip'
+import { AssetHealthPanel2 } from './components/AssetHealthPanel2'
 
 function applySearch(assetsList: Asset[], q: string): Asset[] {
   const s = q.trim().toLowerCase()
@@ -90,8 +91,7 @@ export default function App() {
           alertCount={fleetKpis.alerts}
         />
 
-        {/* The new Sensor Health monitoring strip */}
-  <SensorHealthStrip />
+  
 
         <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
           {/* <GeoMapPanel
@@ -101,8 +101,12 @@ export default function App() {
             routeScope={selectedRoute}
           /> */}
           <GeoMapPanel2 />
-          <AssetHealthPanel />
+          {/* <AssetHealthPanel /> */}
+          <AssetHealthPanel2 />
         </div>
+
+              {/* The new Sensor Health monitoring strip */}
+  <SensorHealthStrip />
 
         <div className="grid gap-3 lg:grid-cols-3">
           <ThreatFeed events={securityEvents} />
