@@ -12,7 +12,8 @@ import {
   Send,
   CheckCircle2,
   ChevronLeft,
-  Layers
+  Layers,
+  ArrowRight
 } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
@@ -22,6 +23,19 @@ import { Badge } from '@/components/ui/badge'
 // Data Imports
 import fundingData from '@/data/fin_funding.json'
 import sensorData from '@/data/fin_sensor.json'
+
+const ASSET_COLORS: Record<string, string> = {
+  AERIAL_LOOP_COIL: '#ef4444', 
+  ANCHOR: '#f59e0b',           
+  CONDUIT: '#10b981',          
+  EQUIPMENT: '#3b82f6',        
+  FIBER_DIST: '#8b5cf6',       
+  FIBER_DROP: '#ec4899',       
+  HANDHOLE: '#6366f1',         
+  PEDESTAL: '#14b8a6',         
+  POLE: '#71717a',             
+  SPLICE_CASE: '#f97316',      
+}
 
 const CRITICALITY_THEMES = {
   Critical: 'border-l-rose-500 bg-rose-50/50 text-rose-700 icon-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
@@ -49,16 +63,33 @@ export function SensorHealthStrip() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
 
-  // 1. Group Data by Layer for the initial view
+  // FIX: Computed groups and stats in ONE top-level hook to avoid loop errors
   const layerGroups = useMemo(() => {
-    const groups: Record<string, number> = {}
+    const groups: Record<string, any> = {}
+    
     sensorData.forEach(sensor => {
-      groups[sensor.associated_layer] = (groups[sensor.associated_layer] || 0) + 1
+      const layer = sensor.associated_layer
+      if (!groups[layer]) {
+        groups[layer] = {
+          name: layer,
+          count: 0,
+          color: ASSET_COLORS[layer] || '#64748b',
+          dist: { Critical: 0, High: 0, Medium: 0, Low: 0 },
+          defects: new Set<string>()
+        }
+      }
+      
+      groups[layer].count++
+      groups[layer].dist[sensor.criticality as keyof typeof groups[typeof layer]['dist']]++
+      groups[layer].defects.add(sensor.defect_type)
     })
-    return Object.entries(groups).map(([name, count]) => ({ name, count }))
+
+    return Object.values(groups).map(g => ({
+      ...g,
+      defects: Array.from(g.defects).slice(0, 2) // Keep top 2 defects for UI cleanliness
+    }))
   }, [])
 
-  // 2. Enrich Sensors with funding data coordinates and GUIDs
   const enrichedSensors = useMemo(() => {
     const data = sensorData.map((sensor) => {
       let assetInfo = { guid: 'N/A', lat: 0, lng: 0, rid: 'N/A' }
@@ -76,10 +107,9 @@ export function SensorHealthStrip() {
       return { ...sensor, ...assetInfo }
     })
 
-    // Filter by selected layer if in drilldown mode
     if (viewMode === 'drilldown' && selectedLayer && selectedLayer !== 'All Layers') {
-    return data.filter(s => s.associated_layer === selectedLayer)
-  }
+      return data.filter(s => s.associated_layer === selectedLayer)
+    }
     return data
   }, [viewMode, selectedLayer])
 
@@ -104,13 +134,13 @@ export function SensorHealthStrip() {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Header with Navigation */}
+      {/* Dynamic Header */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-3">
           {viewMode === 'drilldown' && (
             <button 
               onClick={() => setViewMode('groups')}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 transition-colors cursor-pointer"
             >
               <ChevronLeft className="h-4 w-4 text-neutral-600" />
             </button>
@@ -121,30 +151,27 @@ export function SensorHealthStrip() {
           </h3>
         </div>
 
-        
-        {/* ADD THIS BLOCK HERE */}
-  <div className="flex items-center gap-4">
-    {viewMode === 'groups' && (
-      <button
-        onClick={() => {
-          setSelectedLayer('All Layers'); // Set a generic name for the title
-          setViewMode('drilldown');
-        }}
-        className="text-[10px] font-bold uppercase tracking-widest text-sky-600 hover:text-blue-800 bg-sky-50 px-3 py-1.5 rounded-md border border-sky-100 transition-all cursor-pointer"
-      >
-        Show All
-      </button>
-    )}
-    <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-      {viewMode === 'groups' ? `${layerGroups.length} Layers` : `${enrichedSensors.length} Triggered Sensors`}
-    </span>
-  </div>
-
+        <div className="flex items-center gap-4">
+          {viewMode === 'groups' && (
+            <button
+              onClick={() => {
+                setSelectedLayer('All Layers');
+                setViewMode('drilldown');
+              }}
+              className="text-[10px] font-bold uppercase tracking-widest text-sky-600 hover:text-sky-800 bg-sky-50 px-3 py-1.5 rounded-md border border-sky-100 transition-all cursor-pointer"
+            >
+              Show All
+            </button>
+          )}
+          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+            {viewMode === 'groups' ? `${layerGroups.length} Layers` : `${enrichedSensors.length} Triggered Sensors`}
+          </span>
+        </div>
       </div>
 
-      {/* VIEW 1: Grouped Layers Grid */}
+      {/* VIEW 1: Grouped Summary Cards */}
       {viewMode === 'groups' && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5">
           {layerGroups.map((group) => (
             <button
               key={group.name}
@@ -152,28 +179,60 @@ export function SensorHealthStrip() {
                 setSelectedLayer(group.name)
                 setViewMode('drilldown')
               }}
-              className="group relative flex flex-col items-start gap-3 rounded-xl border border-neutral-200 bg-white p-5 text-left transition-all hover:border-blue-300 hover:shadow-md active:scale-[0.98]"
+              className="group relative flex flex-col items-start rounded-xl border border-neutral-200 bg-white p-5 text-left transition-all hover:border-neutral-300 hover:shadow-xl active:scale-[0.98] cursor-pointer"
+              style={{ borderTop: `4px solid ${group.color}` }}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white transition-colors">
-                <Layers className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">Layer</p>
-                <p className="truncate text-base font-bold text-neutral-900">{group.name.replace(/_/g, ' ')}</p>
-                <div className="mt-3 flex items-center gap-1.5">
-                  <span className="text-xl font-black text-sky-600">{group.count}</span>
-                  <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-tighter">Sensor Nodes</span>
+              <div className="flex w-full items-start justify-between">
+                <div 
+                  className="flex h-10 w-10 items-center justify-center rounded-lg transition-all group-hover:scale-110"
+                  style={{ backgroundColor: `${group.color}15`, color: group.color }}
+                >
+                  <Layers className="h-5 w-5" />
+                </div>
+                <div className="text-right">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Sensors</span>
+                  <p className="text-xl font-black leading-none" style={{ color: group.color }}>{group.count}</p>
                 </div>
               </div>
-              <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Activity className="h-4 w-4 text-blue-200" />
+
+              <div className="mt-4 w-full min-w-0">
+                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">Infrastructure Layer</p>
+                <p className="truncate text-lg font-bold text-neutral-900 tracking-tight">{group.name.replace(/_/g, ' ')}</p>
+              </div>
+
+              {/* Health Distribution UI */}
+              <div className="mt-5 w-full space-y-1.5">
+                <div className="flex justify-between items-end">
+                  <p className="text-[9px] font-bold uppercase tracking-tighter text-neutral-500">Condition</p>
+                  <p className="text-[9px] font-mono text-neutral-400">Live</p>
+                </div>
+                <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
+                  <div className="bg-rose-500 h-full" style={{ width: `${(group.dist.Critical / group.count) * 100}%` }} />
+                  <div className="bg-orange-400 h-full" style={{ width: `${(group.dist.High / group.count) * 100}%` }} />
+                  <div className="bg-amber-400 h-full" style={{ width: `${(group.dist.Medium / group.count) * 100}%` }} />
+                  <div className="bg-emerald-400 h-full" style={{ width: `${(group.dist.Low / group.count) * 100}%` }} />
+                </div>
+              </div>
+
+              <div className="mt-5 w-full pt-4 border-t border-dashed border-neutral-100">
+                <div className="flex flex-wrap gap-1.5">
+                  {group.defects.map((defect: string) => (
+                    <span key={defect} className="rounded bg-neutral-50 px-1.5 py-0.5 text-[8px] font-bold text-neutral-600 border border-neutral-200 uppercase">
+                      {defect}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
+                <ArrowRight className="h-3 w-3 text-neutral-300" />
               </div>
             </button>
           ))}
         </div>
       )}
 
-      {/* VIEW 2: Detailed Node Grid (Drilldown) */}
+      {/* VIEW 2: Drilldown Grid */}
       {viewMode === 'drilldown' && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2">
           {enrichedSensors.map((s) => {
@@ -181,33 +240,24 @@ export function SensorHealthStrip() {
             const theme = CRITICALITY_THEMES[s.criticality as keyof typeof CRITICALITY_THEMES]
             
             return (
-              <Card 
-                key={s.sensor_uid}
-                className={cn(
-                  "group relative border-l-[4px] p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-default overflow-hidden",
-                  theme
-                )}
-              >
+              <Card key={s.sensor_uid} className={cn("group relative border-l-[4px] p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg overflow-hidden", theme)}>
                 <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.03] transition-all group-hover:scale-150" />
-                <div className="relative z-10">
+                <div className="relative z-10 flex flex-col h-full">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
                       <div className={cn("p-2 rounded-lg bg-white shadow-sm", s.criticality === 'Critical' && "animate-pulse")}>
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">{s.sensor_uid}</p>
-                        <p className="text-sm font-bold tracking-tight text-neutral-900 leading-none mt-0.5">{s.sensor_name}</p>
+                        <p className="text-[10px] font-bold uppercase opacity-70">{s.sensor_uid}</p>
+                        <p className="text-sm font-bold text-neutral-900 leading-none mt-0.5">{s.sensor_name}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
                       <Badge className={cn("text-[9px] font-bold", s.criticality === 'Critical' ? "bg-rose-600 text-white" : "bg-neutral-800 text-white")}>
                         {s.criticality}
                       </Badge>
-                      <button 
-                        onClick={() => setReportingSensor(s)}
-                        className="text-[9px] font-bold text-neutral-500 underline decoration-dotted hover:text-neutral-900 transition-colors"
-                      >
+                      <button onClick={() => setReportingSensor(s)} className="text-[9px] font-bold text-neutral-500 underline decoration-dotted hover:text-neutral-900 transition-colors cursor-pointer">
                         Report Incident
                       </button>
                     </div>
@@ -215,32 +265,26 @@ export function SensorHealthStrip() {
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <div className="rounded-md bg-white/60 p-2 border border-black/5">
-                      <p className="text-[9px] font-bold uppercase text-neutral-500 leading-none">Current</p>
-                      <p className="mt-1 text-lg font-black text-neutral-900 leading-none tracking-tighter">
-                        {s.current_value} <span className="text-[10px] font-medium">{s.unit}</span>
-                      </p>
+                      <p className="text-[9px] font-bold uppercase text-neutral-500">Current</p>
+                      <p className="text-lg font-black text-neutral-900 leading-none">{s.current_value} <span className="text-[10px] font-medium">{s.unit}</span></p>
                     </div>
                     <div className="rounded-md bg-white/60 p-2 border border-black/5">
-                      <p className="text-[9px] font-bold uppercase text-neutral-500 leading-none">Threshold</p>
-                      <p className="mt-1 text-lg font-black text-neutral-900 leading-none opacity-40 tracking-tighter">
-                        {s.threshold} <span className="text-[10px] font-medium">{s.unit}</span>
-                      </p>
+                      <p className="text-[9px] font-bold uppercase text-neutral-500">Limit</p>
+                      <p className="text-lg font-black text-neutral-900 leading-none opacity-40">{s.threshold} <span className="text-[10px] font-medium">{s.unit}</span></p>
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-3 border-t border-black/5">
+                  <div className="mt-4 pt-3 border-t border-black/5 mt-auto">
                     <div className="flex items-center justify-between text-[10px]">
-                      <span className="font-bold text-rose-600 flex items-center gap-1">
-                        <MapPin className="h-3 w-3" /> DANGER ZONE
-                      </span>
-                      <span className="font-mono text-neutral-500">{s.associated_layer}</span>
+                      <span className="font-bold text-rose-600 flex items-center gap-1"><MapPin className="h-3 w-3" /> DANGER ZONE</span>
+                      <span className="font-mono text-neutral-500 uppercase">{s.associated_layer}</span>
                     </div>
-                    <div className="mt-1 flex flex-col">
-                      <p className="text-[10px] font-medium text-neutral-700 truncate">GUID: {s.guid}</p>
-                      <p className="text-[10px] font-mono font-bold text-neutral-800">
-                        LOC: {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
-                      </p>
-                    </div>
+                    <p className="text-[10px] font-mono font-normal text-neutral-800 mt-1 truncate">
+                      RID: {s.rid}
+                    </p>
+                    <p className="text-[10px] font-mono font-bold text-neutral-800 mt-1 truncate">
+                      LOC: {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
+                    </p>
                   </div>
                 </div>
               </Card>
@@ -249,7 +293,7 @@ export function SensorHealthStrip() {
         </div>
       )}
 
-      {/* Incident Reporting Modal Logic (Same as before) */}
+      {/* Incident Modal */}
       {reportingSensor && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
@@ -257,12 +301,10 @@ export function SensorHealthStrip() {
               <>
                 <div className="flex items-center justify-between bg-neutral-900 px-6 py-5 text-white">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-rose-500 p-1.5 animate-pulse">
-                      <AlertTriangle className="h-4 w-4 text-white" />
-                    </div>
+                    <div className="rounded-full bg-rose-500 p-1.5 animate-pulse"><AlertTriangle className="h-4 w-4 text-white" /></div>
                     <div>
                       <h2 className="text-sm font-bold uppercase tracking-widest leading-none">Raise Incident</h2>
-                      <p className="mt-1 text-[10px] text-neutral-400 font-mono">UID: {reportingSensor.sensor_uid}</p>
+                      <p className="mt-1 text-[10px] text-neutral-400 font-mono uppercase">UID: {reportingSensor.sensor_uid}</p>
                     </div>
                   </div>
                   <button onClick={closeModal} className="rounded-full p-1 transition-colors hover:bg-white/10"><X className="h-5 w-5" /></button>
@@ -272,7 +314,7 @@ export function SensorHealthStrip() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Assigned To</label>
-                        <div className="rounded border bg-neutral-50 px-3 py-2 text-xs font-bold text-sky-600">Finley Admin</div>
+                        <div className="rounded border bg-neutral-50 px-3 py-2 text-xs font-bold text-sky-600 tracking-tight">Finley Admin</div>
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Priority</label>
@@ -280,14 +322,14 @@ export function SensorHealthStrip() {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Target Asset GUID</label>
-                      <div className="rounded border bg-neutral-50 px-3 py-2 text-[11px] font-mono text-neutral-700 truncate">{reportingSensor.guid}</div>
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Asset GUID</label>
+                      <div className="rounded border bg-neutral-50 px-3 py-2 text-[10px] font-mono text-neutral-700 truncate">{reportingSensor.guid}</div>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Issue Summary</label>
-                      <textarea required className="w-full rounded border border-neutral-200 p-3 text-xs leading-relaxed text-neutral-800 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows={4} defaultValue={`System Detection: ${reportingSensor.defect_type}. \nAsset: ${reportingSensor.sensor_name} shows an out-of-bounds value of ${reportingSensor.current_value} ${reportingSensor.unit}.`} />
+                      <textarea required className="w-full rounded border border-neutral-200 p-3 text-xs leading-relaxed outline-none focus:border-sky-500" rows={4} defaultValue={`System Detection: ${reportingSensor.defect_type}. \nAsset: ${reportingSensor.sensor_name} shows anomalous value of ${reportingSensor.current_value} ${reportingSensor.unit}.`} />
                     </div>
-                    <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50">
+                    <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-sky-700 disabled:opacity-50">
                       {isSubmitting ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><Send className="h-4 w-4" />SUBMIT INCIDENT</>}
                     </button>
                   </div>
@@ -296,8 +338,8 @@ export function SensorHealthStrip() {
             ) : (
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-in zoom-in-90 duration-300">
                 <div className="mb-4 rounded-full bg-emerald-100 p-4 text-emerald-600 ring-8 ring-emerald-50"><CheckCircle2 className="h-12 w-12" /></div>
-                <h2 className="text-xl font-bold text-neutral-900">Incident Reported</h2>
-                <p className="mt-2 text-sm text-neutral-500">Ticket dispatched to <span className="font-semibold text-sky-600">Finley Admin</span>.</p>
+                <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Incident Reported</h2>
+                <p className="mt-2 text-sm text-neutral-500 px-4 leading-relaxed text-center">Ticket for <span className="font-bold text-neutral-700">{reportingSensor.sensor_uid}</span> dispatched to <span className="font-semibold text-sky-600">Finley Admin</span>.</p>
               </div>
             )}
           </div>

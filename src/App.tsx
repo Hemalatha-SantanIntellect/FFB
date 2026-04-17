@@ -23,6 +23,7 @@ import { SensorHealthStrip } from './components/SensorHealthStrip'
 import { AssetHealthPanel2 } from './components/AssetHealthPanel2'
 import { GeoMapPanel3D } from './components/GeoMap3D'
 import { cn } from '@/lib/utils'
+import {ShieldCheck} from 'lucide-react'
 
 // function applySearch(assetsList: Asset[], q: string): Asset[] {
 //   const s = q.trim().toLowerCase()
@@ -142,6 +143,11 @@ export default function App() {
 
               {/* The new Sensor Health monitoring strip */}
   <SensorHealthStrip />
+
+  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-sky-500" />
+            Security Monitoring Metrics
+          </h3>
 
         <div className="grid gap-3 lg:grid-cols-3">
           <ThreatFeed events={securityEvents} />

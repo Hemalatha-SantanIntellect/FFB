@@ -4,6 +4,7 @@ import finleyLogo from '@/assets/finley logo.jpg'
 import { routes } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { AgentConfigModal } from './AgentConfigModal' // Adjust path if needed
 
 // Data Import
 import fundingData from '@/data/fin_funding.json'
@@ -78,6 +79,9 @@ export function TopBar({
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-3 sm:gap-4">
+            {/* INSERT THE NEW AGENT CONFIG TRIGGER HERE */}
+  <AgentConfigModal />
+  
             {/* Search Container */}
             <div ref={wrapRef} className="relative w-full max-w-[240px] sm:max-w-[500px] sm:min-w-[200px]">
               <Search
