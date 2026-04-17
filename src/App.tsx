@@ -21,6 +21,8 @@ import {
 import { filterAssetsByRoute } from '@/lib/assetFilters'
 import { SensorHealthStrip } from './components/SensorHealthStrip'
 import { AssetHealthPanel2 } from './components/AssetHealthPanel2'
+import { GeoMapPanel3D } from './components/GeoMap3D'
+import { cn } from '@/lib/utils'
 
 function applySearch(assetsList: Asset[], q: string): Asset[] {
   const s = q.trim().toLowerCase()
@@ -37,6 +39,7 @@ export default function App() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>(() => allAssets[0])
   const [selectedRoute, setSelectedRoute] = useState('All Routes')
   const [search, setSearch] = useState('')
+  const [mapMode, setMapMode] = useState<'2D' | '3D'>('2D');
 
   const routeFilteredAssets = useMemo(
     () => filterAssetsByRoute(allAssets, selectedRoute),
@@ -91,19 +94,51 @@ export default function App() {
           alertCount={fleetKpis.alerts}
         />
 
-  
 
-        <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
-          {/* <GeoMapPanel
-            assets={routeFilteredAssets}
-            selectedAsset={selectedAsset}
-            onSelectAsset={setSelectedAsset}
-            routeScope={selectedRoute}
-          /> */}
-          <GeoMapPanel2 />
-          {/* <AssetHealthPanel /> */}
-          <AssetHealthPanel2 />
-        </div>
+        <div className="flex flex-col gap-3">
+              {/* Map Header with Toggle */}
+              <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-neutral-200/70 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-700">
+                    Network Topography {mapMode}
+                  </h2>
+                </div>
+                
+                <div className="flex bg-neutral-100 p-1 rounded-md border border-neutral-200">
+                  <button
+                    onClick={() => setMapMode('2D')}
+                    className={cn(
+                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded transition-all",
+                      mapMode === '2D' ? "bg-white text-blue-600 shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                    )}
+                  >
+                    2D View
+                  </button>
+                  <button
+                    onClick={() => setMapMode('3D')}
+                    className={cn(
+                      "px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest rounded transition-all",
+                      mapMode === '3D' ? "bg-white text-blue-600 shadow-sm" : "text-neutral-500 hover:text-neutral-700"
+                    )}
+                  >
+                    3D View
+                  </button>
+                </div>
+              </div>
+
+              {/* Existing Grid Layout */}
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,7fr)_minmax(260px,3fr)]">
+                {mapMode === '3D' ? (
+                  <GeoMapPanel3D />
+                ) : (
+                  <GeoMapPanel2 />
+                )}
+                <AssetHealthPanel2 />
+              </div>
+            </div>
+
+       
 
               {/* The new Sensor Health monitoring strip */}
   <SensorHealthStrip />
