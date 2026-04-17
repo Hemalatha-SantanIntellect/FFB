@@ -24,21 +24,21 @@ import { AssetHealthPanel2 } from './components/AssetHealthPanel2'
 import { GeoMapPanel3D } from './components/GeoMap3D'
 import { cn } from '@/lib/utils'
 
-function applySearch(assetsList: Asset[], q: string): Asset[] {
-  const s = q.trim().toLowerCase()
-  if (!s) return assetsList
-  return assetsList.filter(
-    (a) =>
-      a.name.toLowerCase().includes(s) ||
-      a.id.toLowerCase().includes(s) ||
-      a.route.toLowerCase().includes(s),
-  )
-}
+// function applySearch(assetsList: Asset[], q: string): Asset[] {
+//   const s = q.trim().toLowerCase()
+//   if (!s) return assetsList
+//   return assetsList.filter(
+//     (a) =>
+//       a.name.toLowerCase().includes(s) ||
+//       a.id.toLowerCase().includes(s) ||
+//       a.route.toLowerCase().includes(s),
+//   )
+// }
 
 export default function App() {
   const [selectedAsset, setSelectedAsset] = useState<Asset>(() => allAssets[0])
   const [selectedRoute, setSelectedRoute] = useState('All Routes')
-  const [search, setSearch] = useState('')
+  // const [search, setSearch] = useState('')
   const [mapMode, setMapMode] = useState<'2D' | '3D'>('2D');
 
   const routeFilteredAssets = useMemo(
@@ -46,10 +46,10 @@ export default function App() {
     [selectedRoute],
   )
 
-  const searchSuggestions = useMemo(() => {
-    if (search.trim().length === 0) return []
-    return applySearch(routeFilteredAssets, search)
-  }, [routeFilteredAssets, search])
+  // const searchSuggestions = useMemo(() => {
+  //   if (search.trim().length === 0) return []
+  //   return applySearch(routeFilteredAssets, search)
+  // }, [routeFilteredAssets, search])
 
   const fleetKpis = useMemo(() => {
     const c = countByStatus(allAssets)
@@ -73,13 +73,13 @@ export default function App() {
   return (
     <div className="min-h-svh bg-[#f4f4f2] text-neutral-900 antialiased">
       <TopBar
-        search={search}
-        onSearchChange={setSearch}
-        searchSuggestions={searchSuggestions}
-        onPickSearchAsset={(a) => {
-          setSelectedAsset(a)
-          setSearch('')
-        }}
+        // search={search}
+        // onSearchChange={setSearch}
+        // searchSuggestions={searchSuggestions}
+        // onPickSearchAsset={(a) => {
+        //   setSelectedAsset(a)
+        //   setSearch('')
+        // }}
         selectedRoute={selectedRoute}
         onRouteChange={setSelectedRoute}
       />
