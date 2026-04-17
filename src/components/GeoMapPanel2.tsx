@@ -1,7 +1,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibregl from 'maplibre-gl'
 import { Minus, Plus, Info, Eye, EyeOff, RotateCcw, Layers, X } from 'lucide-react'
-import { useCallback, useMemo, useRef, useState, useEffect } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import Map, { Layer, ScaleControl, Source } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 

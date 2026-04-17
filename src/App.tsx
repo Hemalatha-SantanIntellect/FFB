@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { AssetHealthPanel } from '@/components/AssetHealthPanel'
-import { GeoMapPanel } from '@/components/GeoMapPanel'
+// import { AssetHealthPanel } from '@/components/AssetHealthPanel'
+// import { GeoMapPanel } from '@/components/GeoMapPanel'
 // In App.tsx
 import { GeoMapPanel2 } from './components/GeoMapPanel2'
 import { KPIStrip } from '@/components/KPIStrip'
@@ -83,11 +83,11 @@ export default function App() {
 
       <main className="mx-auto flex max-w-[1760px] flex-col gap-3 px-5 py-4">
         <KPIStrip
-          monitored={fleetKpis.total}
-          avgHealth={fleetKpis.avgHealth}
+          // monitored={fleetKpis.total}
+          // avgHealth={fleetKpis.avgHealth}
           avgSecurity={fleetKpis.avgSecurity}
-          warningCount={fleetKpis.warning}
-          criticalCount={fleetKpis.critical}
+          // warningCount={fleetKpis.warning}
+          // criticalCount={fleetKpis.critical}
           alertCount={fleetKpis.alerts}
         />
 
