@@ -12,12 +12,12 @@ type ThreatFeedProps = {
 
 export function ThreatFeed({ events }: ThreatFeedProps) {
   return (
-    <Card className="border border-neutral-200 bg-white shadow-none">
+    <Card className="fc-panel">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold tracking-tight text-neutral-900">
+        <CardTitle className="fc-section-title">
           Threat feed
         </CardTitle>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-600">
+        <p className="fc-eyebrow">
           Recent signals
         </p>
       </CardHeader>
@@ -26,7 +26,7 @@ export function ThreatFeed({ events }: ThreatFeedProps) {
           <ul>
             {events.map((ev, i) => (
               <li key={ev.id}>
-                {i > 0 ? <Separator className="my-3 bg-neutral-100" /> : null}
+                {i > 0 ? <Separator className="my-3 bg-slate-100" /> : null}
                 <div className="flex gap-2.5">
                   <Badge
                     variant="default"
@@ -38,12 +38,12 @@ export function ThreatFeed({ events }: ThreatFeedProps) {
                     {ev.severity}
                   </Badge>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-semibold leading-snug text-neutral-900">
+                    <p className="text-[13px] font-semibold leading-snug text-slate-900">
                       {ev.title}
                     </p>
-                    <p className="mt-0.5 text-[12px] font-medium text-neutral-700">{ev.asset}</p>
+                    <p className="mt-0.5 text-[12px] font-medium text-slate-700">{ev.asset}</p>
                   </div>
-                  <time className="shrink-0 text-[11px] font-medium tabular-nums text-neutral-600">
+                  <time className="shrink-0 text-[11px] font-medium tabular-nums text-slate-500">
                     {ev.timeAgo}
                   </time>
                 </div>

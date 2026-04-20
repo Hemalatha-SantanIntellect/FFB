@@ -122,9 +122,45 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-[#f4f7fb] text-foreground;
     }
   html {
     @apply font-sans;
     }
+}
+
+@layer components {
+  .fc-shell {
+    @apply min-h-svh bg-[#f4f7fb] text-slate-900 antialiased;
+  }
+
+  .fc-panel {
+    @apply rounded-xl border border-slate-200/80 bg-white shadow-[0_10px_30px_-24px_rgba(15,23,42,0.7)];
+  }
+
+  .fc-panel-muted {
+    @apply rounded-xl border border-slate-200/80 bg-slate-50/70 shadow-[0_10px_30px_-24px_rgba(15,23,42,0.65)];
+  }
+
+  .fc-section-title {
+    @apply text-sm font-semibold tracking-tight text-slate-900;
+  }
+
+  .fc-eyebrow {
+    @apply text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500;
+  }
+
+  .fc-control-btn {
+    @apply flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200/90 bg-white text-slate-700 shadow-sm transition-colors hover:bg-slate-50;
+  }
+}
+
+/* Place map scale below the 2D/3D toggle group. */
+.fc-map-2d .maplibregl-ctrl-top-right .maplibregl-ctrl-scale {
+  margin-top: 3.2rem;
+}
+
+/* 3D toggle sits slightly lower/larger, so scale needs extra offset. */
+.fc-map-3d .maplibregl-ctrl-top-right .maplibregl-ctrl-scale {
+  margin-top: 4.4rem;
 }

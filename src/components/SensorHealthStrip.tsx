@@ -1,348 +1,315 @@
-import { 
-  Activity, 
-  AlertTriangle, 
-  Thermometer, 
-  Droplets, 
-  Wind, 
-  Zap, 
-  Gauge, 
-  MapPin,
-  Construction,
-  X,
-  Send,
-  CheckCircle2,
-  ChevronLeft,
-  Layers,
-  ArrowRight
-} from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { Activity, Filter, LayoutGrid, Rows3, Siren, X } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
-// Data Imports
-import fundingData from '@/data/fin_funding.json'
 import sensorData from '@/data/fin_sensor.json'
 
-const ASSET_COLORS: Record<string, string> = {
-  AERIAL_LOOP_COIL: '#ef4444', 
-  ANCHOR: '#f59e0b',           
-  CONDUIT: '#10b981',          
-  EQUIPMENT: '#3b82f6',        
-  FIBER_DIST: '#8b5cf6',       
-  FIBER_DROP: '#ec4899',       
-  HANDHOLE: '#6366f1',         
-  PEDESTAL: '#14b8a6',         
-  POLE: '#71717a',             
-  SPLICE_CASE: '#f97316',      
-}
-
-const CRITICALITY_THEMES = {
-  Critical: 'border-l-rose-500 bg-rose-50/50 text-rose-700 icon-rose-600 shadow-[0_0_15px_rgba(244,63,94,0.1)]',
-  High: 'border-l-orange-500 bg-orange-50/50 text-orange-700 icon-orange-600',
-  Medium: 'border-l-amber-500 bg-amber-50/50 text-amber-700 icon-amber-600',
-  Low: 'border-l-emerald-500 bg-emerald-50/50 text-emerald-700 icon-emerald-600',
-}
-
-const SENSOR_ICONS: Record<string, any> = {
-  '3-Axis Accelerometer': Activity,
-  'Moisture/Intrusion Sensor': Droplets,
-  'Hydrostatic Pressure Sensor': Gauge,
-  'Optical Time Domain Reflectometer': Zap,
-  'Distributed Acoustic Sensing': Wind,
-  'Multi-Gas & Water Level': AlertTriangle,
-  'Strain Gauge': Construction,
-  'Smart Power Meter': Zap,
-  'Distributed Temperature & Strain': Thermometer,
+const CRITICALITY_TONES: Record<string, string> = {
+  Critical: 'bg-rose-600 text-white',
+  High: 'bg-amber-600 text-white',
+  Medium: 'bg-sky-600 text-white',
+  Low: 'bg-emerald-600 text-white',
 }
 
 export function SensorHealthStrip() {
-  const [viewMode, setViewMode] = useState<'groups' | 'drilldown'>('groups')
-  const [selectedLayer, setSelectedLayer] = useState<string | null>(null)
-  const [reportingSensor, setReportingSensor] = useState<any>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
+  const [selectedLayer, setSelectedLayer] = useState('All Layers')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [incidentToasts, setIncidentToasts] = useState<Array<{
+    id: number
+    sensorName: string
+    sensorUid: string
+    layer: string
+    severity: string
+  }>>([])
+  const incidentToastTimeoutsRef = useRef<Map<number, number>>(new Map())
 
-  // FIX: Computed groups and stats in ONE top-level hook to avoid loop errors
-  const layerGroups = useMemo(() => {
-    const groups: Record<string, any> = {}
-    
-    sensorData.forEach(sensor => {
-      const layer = sensor.associated_layer
-      if (!groups[layer]) {
-        groups[layer] = {
-          name: layer,
-          count: 0,
-          color: ASSET_COLORS[layer] || '#64748b',
-          dist: { Critical: 0, High: 0, Medium: 0, Low: 0 },
-          defects: new Set<string>()
-        }
-      }
-      
-      groups[layer].count++
-      groups[layer].dist[sensor.criticality as keyof typeof groups[typeof layer]['dist']]++
-      groups[layer].defects.add(sensor.defect_type)
-    })
-
-    return Object.values(groups).map(g => ({
-      ...g,
-      defects: Array.from(g.defects).slice(0, 2) // Keep top 2 defects for UI cleanliness
-    }))
+  const layerOptions = useMemo(() => {
+    const layers = Array.from(new Set(sensorData.map((sensor) => sensor.associated_layer))).sort()
+    return ['All Layers', ...layers]
   }, [])
 
-  const enrichedSensors = useMemo(() => {
-    const data = sensorData.map((sensor) => {
-      let assetInfo = { guid: 'N/A', lat: 0, lng: 0, rid: 'N/A' }
-      const layerAssets = (fundingData as any)[sensor.associated_layer] || []
-      const match = layerAssets.find((a: any) => a.sensor_metadata?.sensor_uid === sensor.sensor_uid)
+  const filteredSensors = useMemo(() => {
+    if (selectedLayer === 'All Layers') return sensorData
+    return sensorData.filter((sensor) => sensor.associated_layer === selectedLayer)
+  }, [selectedLayer])
 
-      if (match) {
-        assetInfo = {
-          guid: match.guid,
-          lat: match.geometry.y || (match.geometry.paths ? match.geometry.paths[0][0][1] : 0),
-          lng: match.geometry.x || (match.geometry.paths ? match.geometry.paths[0][0][0] : 0),
-          rid: match.rid
-        }
-      }
-      return { ...sensor, ...assetInfo }
-    })
+  const totals = useMemo(() => {
+    return filteredSensors.reduce(
+      (acc, sensor) => {
+        acc.sensors += 1
+        if (sensor.criticality === 'Critical') acc.critical += 1
+        if (sensor.criticality === 'High') acc.high += 1
+        if (sensor.criticality === 'Medium') acc.medium += 1
+        if (sensor.criticality === 'Low') acc.low += 1
+        return acc
+      },
+      { sensors: 0, critical: 0, high: 0, medium: 0, low: 0 },
+    )
+  }, [filteredSensors])
 
-    if (viewMode === 'drilldown' && selectedLayer && selectedLayer !== 'All Layers') {
-      return data.filter(s => s.associated_layer === selectedLayer)
+  const dismissIncidentToast = (toastId: number) => {
+    const timeoutId = incidentToastTimeoutsRef.current.get(toastId)
+    if (timeoutId) {
+      window.clearTimeout(timeoutId)
+      incidentToastTimeoutsRef.current.delete(toastId)
     }
-    return data
-  }, [viewMode, selectedLayer])
-
-  const handleReportSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setTimeout(() => {
-      setIsSubmitting(false)
-      setShowSuccess(true)
-      setTimeout(() => {
-        setShowSuccess(false)
-        setReportingSensor(null)
-      }, 2200)
-    }, 1200)
+    setIncidentToasts((prev) => prev.filter((toast) => toast.id !== toastId))
   }
 
-  const closeModal = useCallback(() => {
-    setReportingSensor(null)
-    setShowSuccess(false)
-    setIsSubmitting(false)
+  const reportIncident = (sensor: (typeof sensorData)[number]) => {
+    const toastId = Date.now() + Math.floor(Math.random() * 1000)
+    setIncidentToasts((prev) => [
+      ...prev,
+      {
+        id: toastId,
+        sensorName: sensor.sensor_name,
+        sensorUid: sensor.sensor_uid,
+        layer: sensor.associated_layer.replace(/_/g, ' '),
+        severity: sensor.criticality,
+      },
+    ])
+
+    const timeoutId = window.setTimeout(() => {
+      setIncidentToasts((prev) => prev.filter((toast) => toast.id !== toastId))
+      incidentToastTimeoutsRef.current.delete(toastId)
+    }, 2000)
+
+    incidentToastTimeoutsRef.current.set(toastId, timeoutId)
+  }
+
+  useEffect(() => {
+    return () => {
+      incidentToastTimeoutsRef.current.forEach((timeoutId) => window.clearTimeout(timeoutId))
+      incidentToastTimeoutsRef.current.clear()
+    }
   }, [])
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Dynamic Header */}
-      <div className="flex items-center justify-between px-1">
-        <div className="flex items-center gap-3">
-          {viewMode === 'drilldown' && (
-            <button 
-              onClick={() => setViewMode('groups')}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white border border-neutral-200 shadow-sm hover:bg-neutral-50 transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="h-4 w-4 text-neutral-600" />
-            </button>
-          )}
-          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-neutral-500 flex items-center gap-2">
-            <Activity className="h-4 w-4 text-rose-500" />
-            {viewMode === 'groups' ? 'Sensor Infrastructure Groups' : `Sensor Component: ${selectedLayer}`}
-          </h3>
+    <div className="fc-panel flex flex-col gap-4 p-3 sm:p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 text-sky-600" />
+          <h3 className="fc-eyebrow text-[11px]">All Sensors</h3>
         </div>
 
-        <div className="flex items-center gap-4">
-          {viewMode === 'groups' && (
+        <div className="flex items-center gap-2 sm:gap-3">
+          <label
+            htmlFor="sensor-layer-filter"
+            className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-500"
+          >
+            <Filter className="h-3.5 w-3.5" />
+            Category
+          </label>
+          <select
+            id="sensor-layer-filter"
+            value={selectedLayer}
+            onChange={(e) => setSelectedLayer(e.target.value)}
+            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-[11px] font-semibold text-slate-700 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
+          >
+            {layerOptions.map((option) => (
+              <option key={option} value={option}>
+                {option.replace(/_/g, ' ')}
+              </option>
+            ))}
+          </select>
+
+          <div className="grid grid-cols-2 rounded-md border border-slate-200 bg-white p-0.5">
             <button
-              onClick={() => {
-                setSelectedLayer('All Layers');
-                setViewMode('drilldown');
-              }}
-              className="text-[10px] font-bold uppercase tracking-widest text-sky-600 hover:text-sky-800 bg-sky-50 px-3 py-1.5 rounded-md border border-sky-100 transition-all cursor-pointer"
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`rounded px-2 py-1 ${viewMode === 'grid' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              aria-label="Grid view"
             >
-              Show All
+              <LayoutGrid className="h-3.5 w-3.5" />
             </button>
-          )}
-          <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
-            {viewMode === 'groups' ? `${layerGroups.length} Layers` : `${enrichedSensors.length} Triggered Sensors`}
-          </span>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`rounded px-2 py-1 ${viewMode === 'list' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              aria-label="List view"
+            >
+              <Rows3 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* VIEW 1: Grouped Summary Cards */}
-      {viewMode === 'groups' && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-5">
-          {layerGroups.map((group) => (
-            <button
-              key={group.name}
-              onClick={() => {
-                setSelectedLayer(group.name)
-                setViewMode('drilldown')
-              }}
-              className="group relative flex flex-col items-start rounded-xl border border-neutral-200 bg-white p-5 text-left transition-all hover:border-neutral-300 hover:shadow-xl active:scale-[0.98] cursor-pointer"
-              style={{ borderTop: `4px solid ${group.color}` }}
-            >
-              <div className="flex w-full items-start justify-between">
-                <div 
-                  className="flex h-10 w-10 items-center justify-center rounded-lg transition-all group-hover:scale-110"
-                  style={{ backgroundColor: `${group.color}15`, color: group.color }}
-                >
-                  <Layers className="h-5 w-5" />
-                </div>
-                <div className="text-right">
-                  <span className="text-[9px] font-black uppercase tracking-widest text-neutral-400">Sensors</span>
-                  <p className="text-xl font-black leading-none" style={{ color: group.color }}>{group.count}</p>
-                </div>
-              </div>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sensors</p>
+          <p className="mt-1 text-lg font-semibold text-slate-900">{totals.sensors}</p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Critical</p>
+          <p className="mt-1 text-lg font-semibold text-rose-700">{totals.critical}</p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">High</p>
+          <p className="mt-1 text-lg font-semibold text-amber-700">{totals.high}</p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Medium</p>
+          <p className="mt-1 text-lg font-semibold text-sky-700">{totals.medium}</p>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Low</p>
+          <p className="mt-1 text-lg font-semibold text-emerald-700">{totals.low}</p>
+        </div>
+      </div>
 
-              <div className="mt-4 w-full min-w-0">
-                <p className="text-[9px] font-black uppercase tracking-widest text-neutral-400 leading-none mb-1">Infrastructure Layer</p>
-                <p className="truncate text-lg font-bold text-neutral-900 tracking-tight">{group.name.replace(/_/g, ' ')}</p>
-              </div>
-
-              {/* Health Distribution UI */}
-              <div className="mt-5 w-full space-y-1.5">
-                <div className="flex justify-between items-end">
-                  <p className="text-[9px] font-bold uppercase tracking-tighter text-neutral-500">Condition</p>
-                  <p className="text-[9px] font-mono text-neutral-400">Live</p>
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {filteredSensors.map((sensor) => (
+            <Card key={sensor.sensor_uid} className="rounded-xl border border-slate-200 bg-white p-4 shadow-none">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="truncate text-[11px] font-semibold text-slate-800">{sensor.sensor_uid}</p>
+                  <p className="truncate text-sm font-medium text-slate-700">{sensor.sensor_name}</p>
                 </div>
-                <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-neutral-100">
-                  <div className="bg-rose-500 h-full" style={{ width: `${(group.dist.Critical / group.count) * 100}%` }} />
-                  <div className="bg-orange-400 h-full" style={{ width: `${(group.dist.High / group.count) * 100}%` }} />
-                  <div className="bg-amber-400 h-full" style={{ width: `${(group.dist.Medium / group.count) * 100}%` }} />
-                  <div className="bg-emerald-400 h-full" style={{ width: `${(group.dist.Low / group.count) * 100}%` }} />
-                </div>
-              </div>
-
-              <div className="mt-5 w-full pt-4 border-t border-dashed border-neutral-100">
-                <div className="flex flex-wrap gap-1.5">
-                  {group.defects.map((defect: string) => (
-                    <span key={defect} className="rounded bg-neutral-50 px-1.5 py-0.5 text-[8px] font-bold text-neutral-600 border border-neutral-200 uppercase">
-                      {defect}
+                <div className="flex items-center gap-1.5">
+                  <Badge className={`text-[9px] font-semibold ${CRITICALITY_TONES[sensor.criticality] ?? 'bg-slate-600 text-white'}`}>
+                    {sensor.criticality}
+                  </Badge>
+                  <div className="group relative inline-flex">
+                    <button
+                      type="button"
+                      onClick={() => reportIncident(sensor)}
+                      className="inline-flex items-center justify-center rounded-md border border-rose-200 bg-rose-50 p-1 text-rose-600 transition-colors hover:bg-rose-100"
+                      title="Report incident"
+                      aria-label={`Report incident for ${sensor.sensor_name}`}
+                    >
+                      <Siren className="h-3 w-3" />
+                    </button>
+                    <span className="pointer-events-none absolute top-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white shadow-md group-hover:block">
+                      Report incident
                     </span>
-                  ))}
+                  </div>
                 </div>
               </div>
 
-              <div className="absolute bottom-2 right-3 opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0">
-                <ArrowRight className="h-3 w-3 text-neutral-300" />
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                <div className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase text-slate-500">Layer</p>
+                  <p className="truncate font-medium text-slate-700">{sensor.associated_layer.replace(/_/g, ' ')}</p>
+                </div>
+                <div className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase text-slate-500">Defect</p>
+                  <p className="truncate font-medium text-slate-700">{sensor.defect_type}</p>
+                </div>
+                <div className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase text-slate-500">Current</p>
+                  <p className="font-semibold text-slate-800">{sensor.current_value} {sensor.unit}</p>
+                </div>
+                <div className="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                  <p className="text-[9px] font-semibold uppercase text-slate-500">Threshold</p>
+                  <p className="font-medium text-slate-700">{sensor.threshold} {sensor.unit}</p>
+                </div>
               </div>
-            </button>
+            </Card>
           ))}
         </div>
-      )}
+      ) : (
+        <div className="rounded-xl border border-slate-200 bg-white">
+          <div className="flex items-center justify-between border-b border-slate-100 px-3 py-2.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+              All Sensors
+            </p>
+            <p className="text-[11px] font-semibold text-slate-700">
+              {filteredSensors.length} sensors
+            </p>
+          </div>
 
-      {/* VIEW 2: Drilldown Grid */}
-      {viewMode === 'drilldown' && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-in fade-in slide-in-from-bottom-2">
-          {enrichedSensors.map((s) => {
-            const Icon = SENSOR_ICONS[s.sensor_type] || Activity
-            const theme = CRITICALITY_THEMES[s.criticality as keyof typeof CRITICALITY_THEMES]
-            
-            return (
-              <Card key={s.sensor_uid} className={cn("group relative border-l-[4px] p-4 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg overflow-hidden", theme)}>
-                <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-current opacity-[0.03] transition-all group-hover:scale-150" />
-                <div className="relative z-10 flex flex-col h-full">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center gap-2">
-                      <div className={cn("p-2 rounded-lg bg-white shadow-sm", s.criticality === 'Critical' && "animate-pulse")}>
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold uppercase opacity-70">{s.sensor_uid}</p>
-                        <p className="text-sm font-bold text-neutral-900 leading-none mt-0.5">{s.sensor_name}</p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <Badge className={cn("text-[9px] font-bold", s.criticality === 'Critical' ? "bg-rose-600 text-white" : "bg-neutral-800 text-white")}>
-                        {s.criticality}
-                      </Badge>
-                      <button onClick={() => setReportingSensor(s)} className="text-[9px] font-bold text-neutral-500 underline decoration-dotted hover:text-neutral-900 transition-colors cursor-pointer">
-                        Report Incident
+          <div className="max-h-[360px] overflow-auto">
+            <div className="min-w-[760px]">
+              <div className="grid grid-cols-[160px_minmax(220px,1fr)_140px_120px_120px_120px_100px] gap-2 border-b border-slate-100 bg-slate-50 px-3 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sensor UID</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Sensor Name</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Layer</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Current</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Threshold</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Severity</p>
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Actions</p>
+              </div>
+
+              {filteredSensors.map((sensor) => (
+                <div
+                  key={sensor.sensor_uid}
+                  className="grid grid-cols-[160px_minmax(220px,1fr)_140px_120px_120px_120px_100px] gap-2 border-b border-slate-100 px-3 py-2.5 last:border-b-0"
+                >
+                  <p className="truncate text-[11px] font-semibold text-slate-800">{sensor.sensor_uid}</p>
+                  <p className="truncate text-[11px] font-medium text-slate-800">{sensor.sensor_name}</p>
+                  <p className="truncate text-[11px] font-medium text-slate-600">
+                    {sensor.associated_layer.replace(/_/g, ' ')}
+                  </p>
+                  <p className="text-[11px] font-semibold text-slate-800">
+                    {sensor.current_value} {sensor.unit}
+                  </p>
+                  <p className="text-[11px] font-medium text-slate-600">
+                    {sensor.threshold} {sensor.unit}
+                  </p>
+                  <div>
+                    <Badge className={`text-[9px] font-semibold ${CRITICALITY_TONES[sensor.criticality] ?? 'bg-slate-600 text-white'}`}>
+                      {sensor.criticality}
+                    </Badge>
+                  </div>
+                  <div>
+                    <div className="group relative inline-flex">
+                      <button
+                        type="button"
+                        onClick={() => reportIncident(sensor)}
+                        className="inline-flex items-center justify-center rounded-md border border-rose-200 bg-rose-50 p-1.5 text-rose-600 transition-colors hover:bg-rose-100"
+                        title="Report incident"
+                        aria-label={`Report incident for ${sensor.sensor_name}`}
+                      >
+                        <Siren className="h-3.5 w-3.5" />
                       </button>
+                      <span className="pointer-events-none absolute -top-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-medium text-white shadow-md group-hover:block">
+                        Report incident
+                      </span>
                     </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    <div className="rounded-md bg-white/60 p-2 border border-black/5">
-                      <p className="text-[9px] font-bold uppercase text-neutral-500">Current</p>
-                      <p className="text-lg font-black text-neutral-900 leading-none">{s.current_value} <span className="text-[10px] font-medium">{s.unit}</span></p>
-                    </div>
-                    <div className="rounded-md bg-white/60 p-2 border border-black/5">
-                      <p className="text-[9px] font-bold uppercase text-neutral-500">Limit</p>
-                      <p className="text-lg font-black text-neutral-900 leading-none opacity-40">{s.threshold} <span className="text-[10px] font-medium">{s.unit}</span></p>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-black/5 mt-auto">
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="font-bold text-rose-600 flex items-center gap-1"><MapPin className="h-3 w-3" /> DANGER ZONE</span>
-                      <span className="font-mono text-neutral-500 uppercase">{s.associated_layer}</span>
-                    </div>
-                    <p className="text-[10px] font-mono font-normal text-neutral-800 mt-1 truncate">
-                      RID: {s.rid}
-                    </p>
-                    <p className="text-[10px] font-mono font-bold text-neutral-800 mt-1 truncate">
-                      LOC: {s.lat.toFixed(4)}, {s.lng.toFixed(4)}
-                    </p>
                   </div>
                 </div>
-              </Card>
-            )
-          })}
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
-      {/* Incident Modal */}
-      {reportingSensor && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
-            {!showSuccess ? (
-              <>
-                <div className="flex items-center justify-between bg-neutral-900 px-6 py-5 text-white">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-full bg-rose-500 p-1.5 animate-pulse"><AlertTriangle className="h-4 w-4 text-white" /></div>
-                    <div>
-                      <h2 className="text-sm font-bold uppercase tracking-widest leading-none">Raise Incident</h2>
-                      <p className="mt-1 text-[10px] text-neutral-400 font-mono uppercase">UID: {reportingSensor.sensor_uid}</p>
-                    </div>
-                  </div>
-                  <button onClick={closeModal} className="rounded-full p-1 transition-colors hover:bg-white/10"><X className="h-5 w-5" /></button>
+      {filteredSensors.length === 0 && (
+        <div className="rounded-lg border border-slate-200 bg-white p-4 text-center">
+          <p className="text-[12px] font-medium text-slate-600">
+            No sensors found for this category.
+          </p>
+        </div>
+      )}
+
+      {incidentToasts.length > 0 && (
+        <div className="pointer-events-none fixed right-6 top-6 z-50 flex w-[320px] flex-col gap-2">
+          {incidentToasts.map((incidentToast) => (
+            <div
+              key={incidentToast.id}
+              className="pointer-events-auto rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 shadow-lg"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-emerald-800">Incident report submitted successfully.</p>
+                  <p className="mt-1 text-[10px] font-medium text-emerald-700">
+                    Sensor {incidentToast.sensorName} ({incidentToast.sensorUid}) in {incidentToast.layer} layer with{' '}
+                    {incidentToast.severity} severity has been logged.
+                  </p>
                 </div>
-                <form onSubmit={handleReportSubmit} className="p-6">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Assigned To</label>
-                        <div className="rounded border bg-neutral-50 px-3 py-2 text-xs font-bold text-sky-600 tracking-tight">Finley Admin</div>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Priority</label>
-                        <div className={cn("rounded border px-3 py-2 text-xs font-bold text-center capitalize", reportingSensor.criticality === 'Critical' ? "bg-rose-50 text-rose-700 border-rose-100" : "bg-amber-50 text-amber-700 border-amber-100")}>{reportingSensor.criticality}</div>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Asset GUID</label>
-                      <div className="rounded border bg-neutral-50 px-3 py-2 text-[10px] font-mono text-neutral-700 truncate">{reportingSensor.guid}</div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">Issue Summary</label>
-                      <textarea required className="w-full rounded border border-neutral-200 p-3 text-xs leading-relaxed outline-none focus:border-sky-500" rows={4} defaultValue={`System Detection: ${reportingSensor.defect_type}. \nAsset: ${reportingSensor.sensor_name} shows anomalous value of ${reportingSensor.current_value} ${reportingSensor.unit}.`} />
-                    </div>
-                    <button type="submit" disabled={isSubmitting} className="flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 py-3.5 text-sm font-bold text-white transition-all hover:bg-sky-700 disabled:opacity-50">
-                      {isSubmitting ? <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <><Send className="h-4 w-4" />SUBMIT INCIDENT</>}
-                    </button>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-16 px-6 text-center animate-in zoom-in-90 duration-300">
-                <div className="mb-4 rounded-full bg-emerald-100 p-4 text-emerald-600 ring-8 ring-emerald-50"><CheckCircle2 className="h-12 w-12" /></div>
-                <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Incident Reported</h2>
-                <p className="mt-2 text-sm text-neutral-500 px-4 leading-relaxed text-center">Ticket for <span className="font-bold text-neutral-700">{reportingSensor.sensor_uid}</span> dispatched to <span className="font-semibold text-sky-600">Finley Admin</span>.</p>
+                <button
+                  type="button"
+                  onClick={() => dismissIncidentToast(incidentToast.id)}
+                  className="rounded p-1 text-emerald-700 transition-colors hover:bg-emerald-100"
+                  aria-label="Close incident notification"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

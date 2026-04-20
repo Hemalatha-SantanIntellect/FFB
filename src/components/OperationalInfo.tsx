@@ -23,21 +23,21 @@ type OperationalInfoProps = {
 
 export function OperationalInfo({ asset }: OperationalInfoProps) {
   return (
-    <Card className="border border-neutral-200 bg-white shadow-none">
+    <Card className="fc-panel">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold tracking-tight text-neutral-900">
+        <CardTitle className="fc-section-title">
           Asset record
         </CardTitle>
-        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-600">
+        <p className="fc-eyebrow">
           Operations
         </p>
       </CardHeader>
       <CardContent className="space-y-3 pt-0">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <p className="text-[11px] font-semibold text-neutral-700">{asset.id}</p>
-            <p className="text-[13px] font-semibold leading-snug text-neutral-900">{asset.name}</p>
-            <p className="mt-0.5 text-[11px] font-medium text-neutral-600">{asset.assetType}</p>
+            <p className="text-[11px] font-semibold text-slate-700">{asset.id}</p>
+            <p className="text-[13px] font-semibold leading-snug text-slate-900">{asset.name}</p>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-600">{asset.assetType}</p>
           </div>
           <Badge
             variant="outline"
@@ -51,29 +51,29 @@ export function OperationalInfo({ asset }: OperationalInfoProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 text-[12px]">
-          <div className="rounded-md border border-neutral-200 bg-white px-2.5 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-600">
+          <div className="rounded-md border border-slate-200 bg-white px-2.5 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
               Firmware
             </p>
-            <p className="mt-0.5 font-semibold text-neutral-900">{asset.firmware}</p>
+            <p className="mt-0.5 font-semibold text-slate-900">{asset.firmware}</p>
           </div>
-          <div className="rounded-md border border-neutral-200 bg-white px-2.5 py-2">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-600">
+          <div className="rounded-md border border-slate-200 bg-white px-2.5 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-600">
               Last seen
             </p>
-            <p className="mt-0.5 font-semibold text-neutral-900">{asset.lastSeen}</p>
+            <p className="mt-0.5 font-semibold text-slate-900">{asset.lastSeen}</p>
           </div>
         </div>
 
-        <Separator className="bg-neutral-100" />
+        <Separator className="bg-slate-100" />
 
         <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-600">
+          <p className="fc-eyebrow">
             Risk
           </p>
           <dl className="mt-2 grid grid-cols-2 gap-2 text-[12px]">
             <div>
-              <dt className="font-semibold text-neutral-600">Threat</dt>
+              <dt className="font-semibold text-slate-600">Threat</dt>
               <dd className="mt-1.5">
                 <Badge
                   variant="default"
@@ -87,8 +87,8 @@ export function OperationalInfo({ asset }: OperationalInfoProps) {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-neutral-600">Owner</dt>
-              <dd className="font-semibold text-neutral-900">{asset.manager}</dd>
+              <dt className="font-semibold text-slate-600">Owner</dt>
+              <dd className="font-semibold text-slate-900">{asset.manager}</dd>
             </div>
           </dl>
         </div>
