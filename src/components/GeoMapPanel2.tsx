@@ -3,7 +3,6 @@ import maplibregl from 'maplibre-gl'
 import { 
   Minus, 
   Plus, 
-  Info, 
   Eye, 
   EyeOff, 
   RotateCcw, 

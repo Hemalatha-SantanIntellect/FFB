@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Globe, ExternalLink, Monitor } from 'lucide-react'
+import { Globe, Monitor } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const PLATFORM_LINKS = {

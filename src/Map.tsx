@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import WebMap from '@arcgis/core/WebMap';
-import MapView from '@arcgis/core/views/MapView';
+import { useEffect, useRef, useState } from 'react';
+import WebMap from '@arcgis/core/WebMap.js';
+import MapView from '@arcgis/core/views/MapView.js';
 import '@arcgis/core/assets/esri/themes/light/main.css';
 
 const MapDashboard = () => {
