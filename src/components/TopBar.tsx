@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useMemo } from 'react'
-import { Search, X, MapPin, Cpu, Info, FileText } from 'lucide-react'
+import { Search, X } from 'lucide-react'
+import { NavLink } from 'react-router-dom'
 import finleyLogo from '@/assets/finley logo.jpg'
 import { routes } from '@/data/mockData'
 import { cn } from '@/lib/utils'
@@ -13,13 +14,30 @@ type TopBarProps = {
   onRouteChange: (value: string) => void
 }
 
+type SearchAsset = {
+  rid?: string
+  name_as?: string
+  guid?: string
+  category?: string
+  lifecycle_state?: string
+  exchange?: string | null
+  updated?: string
+  security_label?: string
+  connectivity_logic?: unknown
+  geometry?: {
+    x?: number
+    y?: number
+    paths?: number[][][]
+  }
+}
+
 export function TopBar({
   selectedRoute,
   onRouteChange,
 }: TopBarProps) {
   const [search, setSearch] = useState('')
   const [open, setOpen] = useState(false)
-  const [selectedAsset, setSelectedAsset] = useState<any>(null)
+  const [selectedAsset, setSelectedAsset] = useState<SearchAsset | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
 
   // Flatten funding data for searching
@@ -78,8 +96,51 @@ export function TopBar({
           </div>
 
           <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-3 sm:gap-4">
+            <nav className="grid shrink-0 grid-cols-3 rounded-lg border border-slate-200 bg-white p-0.5">
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) =>
+                  cn(
+                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    isActive
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                  )
+                }
+              >
+                Operations
+              </NavLink>
+              <NavLink
+                to="/client-portal"
+                className={({ isActive }) =>
+                  cn(
+                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    isActive
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                  )
+                }
+              >
+                Client Portal
+              </NavLink>
+              <NavLink
+                to="/command-center"
+                className={({ isActive }) =>
+                  cn(
+                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    isActive
+                      ? 'bg-slate-900 text-white'
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+                  )
+                }
+              >
+                Command Center
+              </NavLink>
+            </nav>
+
             {/* Search Container */}
-            <div ref={wrapRef} className="relative w-full max-w-[240px] sm:max-w-[460px] sm:min-w-[220px]">
+            <div ref={wrapRef} className="relative w-full max-w-[220px] sm:max-w-[320px] sm:min-w-[180px]">
               <Search
                 className="pointer-events-none absolute left-2.5 top-1/2 z-[1] h-3.5 w-3.5 -translate-y-1/2 text-slate-500"
                 aria-hidden
@@ -143,79 +204,64 @@ export function TopBar({
 
       {/* Asset Detail Pop-up (Z-Level 100) */}
       {selectedAsset && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between bg-slate-900 px-6 py-5 text-white">
-              <div className="flex items-center gap-4">
-                <div className="rounded-lg bg-sky-600 p-2">
-                  <Cpu className="h-5 w-5" />
-                </div>
-                <div>
-                  <h2 className="text-base font-bold tracking-tight">{selectedAsset.name_as || 'Asset Details'}</h2>
-                  <p className="text-[11px] font-mono uppercase text-slate-300">{selectedAsset.rid} • {selectedAsset.guid}</p>
-                </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/35 p-4 backdrop-blur-[1px] animate-in fade-in duration-200">
+          <div className="w-full max-w-xl rounded-xl border border-slate-200 bg-white shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Asset Search Preview
+                </p>
+                <h2 className="truncate text-sm font-semibold tracking-tight text-slate-900">
+                  {selectedAsset.name_as || 'Infrastructure Asset'}
+                </h2>
+                <p className="truncate text-[11px] font-mono text-slate-500">
+                  {selectedAsset.rid} {selectedAsset.guid ? `• ${selectedAsset.guid}` : ''}
+                </p>
               </div>
-              <button 
+              <button
                 onClick={() => setSelectedAsset(null)}
-                className="rounded-full p-1.5 transition-colors hover:bg-white/10"
+                className="rounded-md border border-slate-200 p-1.5 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
+                aria-label="Close search preview"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="max-h-[70vh] overflow-y-auto p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                {/* Section 1: Core Info */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <Info className="h-4 w-4 text-sky-600" />
-                    <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">General Info</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <DetailRow label="Layer" value={selectedAsset.category} />
-                    <DetailRow label="Status" value={selectedAsset.lifecycle_state} highlight />
-                    <DetailRow label="Exchange" value={selectedAsset.exchange || 'N/A'} />
-                    <DetailRow label="Updated" value={new Date(selectedAsset.updated).toLocaleString()} />
-                  </div>
-                </div>
-
-                {/* Section 2: Location & Connectivity */}
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 border-b pb-2">
-                    <MapPin className="h-4 w-4 text-sky-600" />
-                    <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Geo & Connectivity</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <DetailRow label="Lat" value={selectedAsset.geometry?.y || selectedAsset.geometry?.paths?.[0][0][1]} />
-                    <DetailRow label="Lng" value={selectedAsset.geometry?.x || selectedAsset.geometry?.paths?.[0][0][0]} />
-                    <DetailRow label="Logic" value={selectedAsset.connectivity_logic ? "Registered" : "None"} />
-                    <DetailRow label="Security" value={selectedAsset.security_label} />
-                  </div>
+            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+                <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Asset Profile
+                </p>
+                <div className="space-y-1.5">
+                  <DetailRow label="Layer" value={String(selectedAsset.category ?? 'N/A')} />
+                  <DetailRow label="Status" value={String(selectedAsset.lifecycle_state ?? 'Unknown')} highlight />
+                  <DetailRow label="Exchange" value={String(selectedAsset.exchange ?? 'N/A')} />
+                  <DetailRow
+                    label="Updated"
+                    value={selectedAsset.updated ? new Date(selectedAsset.updated).toLocaleString() : 'Unknown'}
+                  />
                 </div>
               </div>
 
-              {/* RAW Metadata Preview */}
-              <div className="mt-8">
-                <div className="flex items-center gap-2 border-b pb-2 mb-3">
-                  <FileText className="h-4 w-4 text-slate-400" />
-                  <h3 className="text-xs font-semibold uppercase tracking-widest text-slate-500">Raw Technical Metadata</h3>
+              <div className="rounded-lg border border-slate-200 bg-slate-50/70 px-3 py-2.5">
+                <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  Geo + Access
+                </p>
+                <div className="space-y-1.5">
+                  <DetailRow label="Lat" value={String(selectedAsset.geometry?.y ?? selectedAsset.geometry?.paths?.[0]?.[0]?.[1] ?? '—')} />
+                  <DetailRow label="Lng" value={String(selectedAsset.geometry?.x ?? selectedAsset.geometry?.paths?.[0]?.[0]?.[0] ?? '—')} />
+                  <DetailRow label="Linking" value={selectedAsset.connectivity_logic ? 'Registered' : 'None'} />
+                  <DetailRow label="Security" value={String(selectedAsset.security_label ?? 'N/A')} />
                 </div>
-                <pre className="overflow-x-auto rounded-lg border bg-slate-50 p-4 text-[11px] font-mono leading-relaxed text-slate-700">
-                  {JSON.stringify(selectedAsset, null, 2)}
-                </pre>
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex justify-end border-t bg-slate-50 px-6 py-4">
-              <button 
+            <div className="flex justify-end border-t border-slate-200 bg-slate-50/70 px-4 py-3">
+              <button
                 onClick={() => setSelectedAsset(null)}
-                className="rounded-lg bg-slate-900 px-6 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
+                className="rounded-md border border-slate-900 bg-slate-900 px-4 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-slate-800"
               >
-                CLOSE PREVIEW
+                Close
               </button>
             </div>
           </div>
