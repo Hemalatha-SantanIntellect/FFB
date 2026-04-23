@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@arcgis/core": "^5.0.17",
     "@base-ui/react": "^1.4.0",
     "@deck.gl/core": "^9.3.0",
     "@deck.gl/layers": "^9.3.0",
@@ -24,6 +25,7 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-map-gl": "^8.1.1",
+    "react-router-dom": "^7.14.2",
     "recharts": "^3.8.1",
     "shadcn": "^4.2.0",
     "tailwind-merge": "^3.5.0",

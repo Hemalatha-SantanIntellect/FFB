@@ -1,6 +1,20 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibregl from 'maplibre-gl'
-import { Minus, Plus, Info, Eye, EyeOff, RotateCcw, Layers, X, LocateFixed, ChevronRight, ChevronDown } from 'lucide-react'
+import { 
+  Minus, 
+  Plus, 
+  Info, 
+  Eye, 
+  EyeOff, 
+  RotateCcw, 
+  Layers, 
+  X, 
+  LocateFixed, 
+  ChevronRight, 
+  ChevronDown,
+  AlertTriangle,
+  ExternalLink
+} from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Map, { Layer, ScaleControl, Source } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
@@ -23,6 +37,12 @@ const MAP_STYLES = [
   { id: 'streets', label: 'Streets', url: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json' },
 ]
 
+const PRIORITY_COLORS: Record<string, string> = {
+  '1': '#ef4444', // Red
+  '2': '#f59e0b', // Amber
+  '3': '#3b82f6', // Blue
+}
+
 type GeoMapPanel2Props = {
   mapMode: '2D' | '3D'
   onMapModeChange: (mode: '2D' | '3D') => void
@@ -39,30 +59,90 @@ export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
     new Set(MAP_ASSET_CATEGORIES),
   )
 
+  // Incident & Animation States
+  const [incidents, setIncidents] = useState<Record<string, any>>({})
+  const [pulseOpacity, setPulseOpacity] = useState(1)
+
+  // 1. Fetch Incidents for Finley USA
+  useEffect(() => {
+    const fetchIncidents = async () => {
+      const SN_INSTANCE = 'https://accelareincdemo7.service-now.com'
+      const auth = btoa('gautham_api_interface:AccelareDemo7#')
+      // Try this more robust query string
+const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7'; 
+// state!=7 filters out closed incidents
+      
+      try {
+        const response = await fetch(
+          `${SN_INSTANCE}/api/now/table/incident?sysparm_query=${encodeURIComponent(query)}`,
+          { headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' } }
+        )
+        const data = await response.json()
+        console.log(data)
+        const mapping: Record<string, any> = {}
+        if (data.result) {
+          data.result.forEach((inc: any) => {
+            mapping[inc.correlation_id] = inc
+          })
+        }
+        setIncidents(mapping)
+      } catch (err) {
+        console.error("SN Fetch Error:", err)
+      }
+    }
+    fetchIncidents()
+    const interval = setInterval(fetchIncidents, 10000) // Poll every 10s
+    return () => clearInterval(interval)
+  }, [])
+
+  // 2. Pulse Animation Effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPulseOpacity(prev => (prev === 1 ? 0.3 : 1))
+    }, 800)
+    return () => clearInterval(interval)
+  }, [])
+
   useEffect(() => {
     setIsLegendCollapsed(Boolean(selectedAsset))
   }, [selectedAsset])
 
   const geoData = useMemo(() => {
-    const points: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
-    const lines: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+    const points: any = { type: 'FeatureCollection', features: [] }
+    const lines: any = { type: 'FeatureCollection', features: [] }
+    
     Object.entries(fundingData).forEach(([category, items]: [string, any]) => {
       items.forEach((item: any) => {
+        const incident = incidents[item.guid]
         const props = {
           ...item,
           category,
           iconId: `icon-${category}`,
           color: MAP_ASSET_PALETTE[category as keyof typeof MAP_ASSET_PALETTE] || '#64748b',
+          hasIncident: !!incident,
+          incidentPriority: incident?.priority || '3',
+          incidentColor: PRIORITY_COLORS[incident?.priority] || '#3b82f6',
         }
+
         if (item.geometry.x && item.geometry.y) {
-          points.features.push({ type: 'Feature', id: item.rid, properties: props, geometry: { type: 'Point', coordinates: [item.geometry.x, item.geometry.y] } })
+          points.features.push({ 
+            type: 'Feature', 
+            id: item.rid, 
+            properties: props, 
+            geometry: { type: 'Point', coordinates: [item.geometry.x, item.geometry.y] } 
+          })
         } else if (item.geometry.paths) {
-          lines.features.push({ type: 'Feature', id: item.rid, properties: props, geometry: { type: 'LineString', coordinates: item.geometry.paths[0].map((p: any) => [p[0], p[1]]) } })
+          lines.features.push({ 
+            type: 'Feature', 
+            id: item.rid, 
+            properties: props, 
+            geometry: { type: 'LineString', coordinates: item.geometry.paths[0].map((p: any) => [p[0], p[1]]) } 
+          })
         }
       })
     })
     return { points, lines }
-  }, [])
+  }, [incidents])
 
   const mapFilter = useMemo(() => ['in', ['get', 'category'], ['literal', Array.from(visibleCategories)]], [visibleCategories])
 
@@ -78,7 +158,6 @@ export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
     registerIcons(e.target)
   }, [registerIcons])
 
-  // Toggle Category Filter
   const toggleCategory = (category: string) => {
     const next = new Set(visibleCategories)
     if (next.has(category)) {
@@ -93,35 +172,19 @@ export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
   const fitToAssets = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (!map) return
-
     const lngs: number[] = []
     const lats: number[] = []
 
-    geoData.points.features.forEach((feature) => {
-      const category = feature.properties?.category as string | undefined
-      if (!category || !visibleCategories.has(category)) return
-      const coords = feature.geometry.type === 'Point' ? feature.geometry.coordinates : null
-      if (!coords) return
-      lngs.push(coords[0] as number)
-      lats.push(coords[1] as number)
+    geoData.points.features.forEach((f: any) => {
+      if (!visibleCategories.has(f.properties.category)) return
+      lngs.push(f.geometry.coordinates[0]); lats.push(f.geometry.coordinates[1])
     })
 
-    geoData.lines.features.forEach((feature) => {
-      const category = feature.properties?.category as string | undefined
-      if (!category || !visibleCategories.has(category)) return
-      if (feature.geometry.type !== 'LineString') return
-      feature.geometry.coordinates.forEach((point) => {
-        lngs.push(point[0] as number)
-        lats.push(point[1] as number)
-      })
-    })
-
-    if (lngs.length === 0 || lats.length === 0) return
-
+    if (lngs.length === 0) return
     const sw: [number, number] = [Math.min(...lngs), Math.min(...lats)]
     const ne: [number, number] = [Math.max(...lngs), Math.max(...lats)]
-    map.fitBounds([sw, ne], { padding: 70, duration: 900, maxZoom: 17.5 })
-  }, [geoData.lines.features, geoData.points.features, visibleCategories])
+    map.fitBounds([sw, ne], { padding: 70, duration: 900 })
+  }, [geoData, visibleCategories])
 
   return (
     <Card className="fc-panel fc-map-2d relative flex min-h-[580px] flex-1 overflow-hidden bg-slate-50/60">
@@ -132,205 +195,143 @@ export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
         initialViewState={{ longitude: -91.422, latitude: 44.792, zoom: 14.5 }}
         onLoad={onMapLoad}
         onStyleData={(e) => registerIcons(e.target)}
-        onClick={(e) => setSelectedAsset(e.features?.[0]?.properties || null)}
-        interactiveLayerIds={['funding-points', 'funding-lines']}
+        onClick={(e) => {
+          const feature = e.features?.[0];
+          if (feature) {
+            setSelectedAsset({
+              ...feature.properties,
+              sn_incident: incidents[feature.properties.guid]
+            });
+          } else {
+            setSelectedAsset(null);
+          }
+        }}
+        interactiveLayerIds={['funding-points', 'funding-lines', 'incident-glow']}
         style={{ width: '100%', height: '100%' }}
       >
         <Source id="lines-src" type="geojson" data={geoData.lines}>
           <Layer id="funding-lines" type="line" filter={mapFilter as any} paint={{ 'line-color': ['get', 'color'], 'line-width': 3.5, 'line-opacity': 0.8 }} />
         </Source>
+
         {iconsLoaded && (
           <Source id="points-src" type="geojson" data={geoData.points}>
-            <Layer id="funding-points" type="symbol" filter={mapFilter as any} layout={{ 'icon-image': ['get', 'iconId'], 'icon-size': 0.55, 'icon-allow-overlap': true }} />
+            {/* Blinking Glow Layer */}
+            <Layer 
+              id="incident-glow" 
+              type="circle" 
+              filter={['all', mapFilter as any, ['==', ['get', 'hasIncident'], true]]}
+              paint={{
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 12, 8, 16, 22],
+                'circle-color': ['get', 'incidentColor'],
+                'circle-blur': 0.8,
+                'circle-opacity': pulseOpacity * 0.7
+              }}
+            />
+            <Layer 
+              id="funding-points" 
+              type="symbol" 
+              filter={mapFilter as any} 
+              layout={{ 'icon-image': ['get', 'iconId'], 'icon-size': 0.55, 'icon-allow-overlap': true }} 
+            />
           </Source>
         )}
         <ScaleControl position="top-right" />
       </Map>
 
       {/* Legend / Filters */}
-      <div
-        className={cn(
-          'absolute left-3 top-3 z-10 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur-md sm:left-4 sm:top-4',
-          isLegendCollapsed ? 'w-[132px]' : 'w-[220px]',
-        )}
-      >
+      <div className={cn('absolute left-3 top-3 z-10 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur-md w-[220px]', isLegendCollapsed && 'w-[132px]')}>
         <div className={cn('flex items-center justify-between', !isLegendCollapsed && 'mb-3 border-b pb-2')}>
-          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Map legend</h4>
-          <button
-            type="button"
-            onClick={() => setIsLegendCollapsed((v) => !v)}
-            className="rounded p-1 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
-            title={isLegendCollapsed ? 'Expand legend' : 'Collapse legend'}
-          >
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Finley Legend</h4>
+          <button onClick={() => setIsLegendCollapsed(!isLegendCollapsed)} className="rounded p-1 text-slate-500 hover:bg-slate-100">
             {isLegendCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
         </div>
-
         {!isLegendCollapsed && (
-          <>
-            <div className="mb-2.5 flex items-center justify-between">
-              <button
-                onClick={() => setVisibleCategories(new Set())}
-                className="flex cursor-pointer items-center gap-1 text-[9px] font-semibold text-slate-500 hover:text-slate-700"
-              >
-                <EyeOff className="h-2.5 w-2.5" /> Hide All
-              </button>
-              <button
-                onClick={() => setVisibleCategories(new Set(MAP_ASSET_CATEGORIES))}
-                className="flex cursor-pointer items-center gap-1 text-[9px] font-semibold text-sky-700 hover:text-sky-800"
-              >
-                <RotateCcw className="h-2.5 w-2.5" /> Reset
-              </button>
+          <div className="space-y-0.5">
+            <div className="mb-2 flex justify-between">
+              <button onClick={() => setVisibleCategories(new Set())} className="flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase"><EyeOff className="h-2.5 w-2.5" /> Hide</button>
+              <button onClick={() => setVisibleCategories(new Set(MAP_ASSET_CATEGORIES))} className="flex items-center gap-1 text-[9px] font-bold text-sky-600 uppercase"><RotateCcw className="h-2.5 w-2.5" /> Reset</button>
             </div>
-
-            <div className="space-y-0.5">
-              {Object.entries(MAP_ASSET_PALETTE).map(([type, color]) => {
-                const isActive = visibleCategories.has(type)
-                return (
-                  <button
-                    key={type}
-                    onClick={() => toggleCategory(type)}
-                    className={cn(
-                      'flex w-full cursor-pointer items-center justify-between rounded-md px-2 py-1.5 transition-all',
-                      isActive ? 'bg-transparent hover:bg-slate-100' : 'bg-slate-50 opacity-40 grayscale',
-                    )}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <AssetLegendIcon category={type} color={color} className="h-4 w-4" />
-                      <span className="text-[10px] font-semibold text-slate-700">{mapLegendLabel(type)}</span>
-                    </div>
-                    {isActive ? <Eye className="h-3 w-3 text-slate-400" /> : <EyeOff className="h-3 w-3 text-slate-300" />}
-                  </button>
-                )
-              })}
-            </div>
-          </>
+            {Object.entries(MAP_ASSET_PALETTE).map(([type, color]) => (
+              <button key={type} onClick={() => toggleCategory(type)} className={cn('flex w-full items-center justify-between rounded-md px-2 py-1.5 transition-all', visibleCategories.has(type) ? 'opacity-100' : 'opacity-30 grayscale')}>
+                <div className="flex items-center gap-2.5">
+                  <AssetLegendIcon category={type} color={color} className="h-4 w-4" />
+                  <span className="text-[10px] font-semibold text-slate-700">{mapLegendLabel(type)}</span>
+                </div>
+                {visibleCategories.has(type) ? <Eye className="h-3 w-3 text-slate-400" /> : <EyeOff className="h-3 w-3 text-slate-300" />}
+              </button>
+            ))}
+          </div>
         )}
       </div>
 
-      <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+      {/* Control Cluster */}
+      <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4 flex gap-2">
         <div className="grid grid-cols-2 rounded-lg border border-slate-200 bg-white/95 p-1 shadow-md backdrop-blur-md">
-          <button
-            type="button"
-            onClick={() => onMapModeChange('2D')}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors',
-              mapMode === '2D'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-            )}
-          >
-            2D
-          </button>
-          <button
-            type="button"
-            onClick={() => onMapModeChange('3D')}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-colors',
-              mapMode === '3D'
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-            )}
-          >
-            3D
-          </button>
+          <button onClick={() => onMapModeChange('2D')} className={cn('rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase', mapMode === '2D' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>2D</button>
+          <button onClick={() => onMapModeChange('3D')} className={cn('rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase', mapMode === '3D' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100')}>3D</button>
         </div>
       </div>
 
-      {/* Control Cluster (Bottom Right) */}
-      <div className="absolute bottom-6 right-3 z-10 flex flex-col items-end gap-2 sm:bottom-10 sm:right-4">
+      <div className="absolute bottom-6 right-3 z-10 flex flex-col items-end gap-2">
         {showStyleMenu && (
           <div className="mb-1 w-36 rounded-lg border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in slide-in-from-right-2">
             {MAP_STYLES.map((style) => (
-              <button
-                key={style.id}
-                onClick={() => {
-                  setCurrentStyle(style.url)
-                  setShowStyleMenu(false)
-                }}
-                className={cn(
-                  "w-full rounded-md px-3 py-2 text-left text-[11px] font-semibold transition-colors",
-                  currentStyle === style.url ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-100"
-                )}
-              >
+              <button key={style.id} onClick={() => { setCurrentStyle(style.url); setShowStyleMenu(false); }} className={cn("w-full rounded-md px-3 py-2 text-left text-[11px] font-semibold", currentStyle === style.url ? "bg-sky-50 text-sky-700" : "text-slate-600 hover:bg-slate-100")}>
                 {style.label}
               </button>
             ))}
           </div>
         )}
-
-        <div className="flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={fitToAssets}
-            className="fc-control-btn"
-            title="Recenter to visible assets"
-          >
-            <LocateFixed className="h-4.5 w-4.5" />
-          </button>
-
-          <button 
-            onClick={() => setShowStyleMenu(!showStyleMenu)}
-            className={cn(
-              "fc-control-btn",
-              showStyleMenu ? "border-sky-500 text-sky-700" : ""
-            )}
-          >
-            <Layers className="h-5 w-5" />
-          </button>
-
-          <div className="flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
-            <button onClick={() => mapRef.current?.getMap().zoomIn()} className="border-b p-2.5 hover:bg-slate-100">
-              <Plus className="h-4 w-4 text-slate-600" />
-            </button>
-            <button onClick={() => mapRef.current?.getMap().zoomOut()} className="p-2.5 hover:bg-slate-100">
-              <Minus className="h-4 w-4 text-slate-600" />
-            </button>
-          </div>
+        <button onClick={fitToAssets} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><LocateFixed className="h-4.5 w-4.5" /></button>
+        <button onClick={() => setShowStyleMenu(!showStyleMenu)} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><Layers className="h-5 w-5" /></button>
+        <div className="flex flex-col rounded-lg border border-slate-200 bg-white shadow-md">
+          <button onClick={() => mapRef.current?.getMap().zoomIn()} className="border-b p-2.5 hover:bg-slate-100"><Plus className="h-4 w-4" /></button>
+          <button onClick={() => mapRef.current?.getMap().zoomOut()} className="p-2.5 hover:bg-slate-100"><Minus className="h-4 w-4" /></button>
         </div>
       </div>
 
-      {/* Asset Details (Visible on Click) */}
+      {/* Asset & Incident Details */}
       {selectedAsset && (
-        <div className="animate-in fade-in slide-in-from-bottom-4 absolute bottom-4 left-3 z-20 w-[calc(100%-1.5rem)] max-w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl sm:bottom-6 sm:left-6 sm:p-5">
-          <div className="mb-3 flex items-start justify-between gap-2">
-            <div className="min-w-0 space-y-1">
-              <Badge variant="secondary" className="text-[10px] font-semibold uppercase">
-                {String(selectedAsset.category ?? '').trim().replace(/_/g, ' ')}
-              </Badge>
-              <span className="block truncate text-[10px] font-mono text-slate-400">{selectedAsset.rid}</span>
+        <div className="animate-in fade-in slide-in-from-bottom-4 absolute bottom-4 left-3 z-20 w-[calc(100%-1.5rem)] max-w-80 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl sm:bottom-6 sm:left-6">
+          <div className="mb-3 flex items-start justify-between">
+            <div className="space-y-1">
+              <Badge variant="secondary" className="text-[10px] font-bold uppercase">{selectedAsset.category?.replace(/_/g, ' ')}</Badge>
+              <div className="text-[10px] font-mono text-slate-400">{selectedAsset.rid}</div>
             </div>
-            <button
-              type="button"
-              onClick={() => setSelectedAsset(null)}
-              className="shrink-0 rounded-md p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
-              title="Close details"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <button onClick={() => setSelectedAsset(null)} className="rounded-md p-1.5 text-slate-400 hover:bg-slate-100"><X className="h-4 w-4" /></button>
           </div>
-          <h3 className="text-base font-semibold text-slate-900 sm:text-lg">{selectedAsset.name_as || 'Unnamed Asset'}</h3>
+
+          <h3 className="text-base font-bold text-slate-900">{selectedAsset.name_as || 'Unnamed Asset'}</h3>
+          
           <div className="mt-4 space-y-2 border-t pt-3">
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-500">Status:</span>
-              <span className="font-semibold uppercase tracking-tighter text-emerald-600">{selectedAsset.lifecycle_state}</span>
-            </div>
-            <div className="flex justify-between text-xs">
-              <span className="text-slate-500">Exchange:</span>
-              <span className="font-semibold">{selectedAsset.exchange || 'Truax'}</span>
-            </div>
-            {selectedAsset.sensor_metadata && (
-              <div className="mt-3 rounded-lg border border-sky-100 bg-sky-50/60 p-2.5">
-                <p className="mb-1 flex items-center gap-1 text-[9px] font-semibold uppercase text-sky-700">
-                  <Info className="h-2.5 w-2.5" /> Sensor Node
-                </p>
-                <p className="text-[11px] font-medium text-sky-900">
-                  {typeof selectedAsset.sensor_metadata === 'string' 
-                    ? JSON.parse(selectedAsset.sensor_metadata).sensor_name 
-                    : selectedAsset.sensor_metadata.sensor_name}
-                </p>
+            {selectedAsset.sn_incident ? (
+              <div className="mb-3 rounded-lg border border-red-100 bg-red-50 p-3 ring-1 ring-red-200">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-700 uppercase">
+                    <AlertTriangle className="h-3 w-3" /> {selectedAsset.sn_incident.number}
+                  </div>
+                  <Badge className={cn("text-[8px] h-4", selectedAsset.sn_incident.priority === '1' ? "bg-red-600" : "bg-orange-500")}>
+                    P{selectedAsset.sn_incident.priority}
+                  </Badge>
+                </div>
+                <p className="text-[11px] font-bold text-slate-900 leading-tight">{selectedAsset.sn_incident.short_description}</p>
+                <a 
+                  href={`https://accelareincdemo7.service-now.com/nav_to.do?uri=incident.do?sys_id=${selectedAsset.sn_incident.sys_id}`} 
+                  target="_blank" rel="noopener noreferrer"
+                  className="mt-2 flex items-center gap-1 text-[9px] font-bold text-red-700 hover:underline"
+                >
+                  Open ServiceNow <ExternalLink className="h-2.5 w-2.5" />
+                </a>
+              </div>
+            ) : (
+              <div className="flex justify-between text-xs">
+                <span className="text-slate-500">Device Health:</span>
+                <span className="font-bold text-emerald-600 uppercase">Operational</span>
               </div>
             )}
+            <div className="flex justify-between text-xs"><span className="text-slate-500">Lifecycle:</span><span className="font-semibold">{selectedAsset.lifecycle_state}</span></div>
+            <div className="flex justify-between text-xs"><span className="text-slate-500">Exchange:</span><span className="font-semibold">{selectedAsset.exchange || 'Truax'}</span></div>
           </div>
         </div>
       )}
