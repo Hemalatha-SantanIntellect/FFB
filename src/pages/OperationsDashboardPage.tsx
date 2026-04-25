@@ -9,12 +9,8 @@ import { KPIStrip } from '@/components/KPIStrip'
 import { SecurityPosture } from '@/components/SecurityPosture'
 import { SensorHealthStrip } from '@/components/SensorHealthStrip'
 import { AgentConfigModal } from '@/components/AgentConfigModal'
-import {
-  assets as allAssets,
-  controlMetrics,
-  type Asset,
-} from '@/data/mockData'
-import { filterAssetsByRoute } from '@/lib/assetFilters'
+import fundingData from '@/data/fin_funding.json'
+import { fundingMatchesRouteFilter } from '@/lib/assetFilters'
 import { buildRouteSnapshot } from '@/lib/routeMetrics'
 import { eventSeverityBadgeClass } from '@/lib/severityChips'
 import { cn } from '@/lib/utils'
@@ -41,16 +37,21 @@ type OpsWorkflow = {
 }
 
 export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPageProps) {
-  const [selectedAsset, setSelectedAsset] = useState<Asset>(() => allAssets[0])
+  const scopedFundingAssets = useMemo<Record<string, unknown>[]>(
+    () =>
+      Object.entries(fundingData as Record<string, Record<string, unknown>[]>).flatMap(([category, items]) =>
+        items
+          .filter((item) => fundingMatchesRouteFilter(item as { exchange?: string | null; serving_area?: string | null }, selectedRoute))
+          .map((item) => ({ ...(item as Record<string, unknown>), category })),
+      ),
+    [selectedRoute],
+  )
+
+  const [selectedAsset, setSelectedAsset] = useState<Record<string, unknown> | null>(null)
   const [mapMode, setMapMode] = useState<'2D' | '3D'>('2D')
   const [activeWorkflow, setActiveWorkflow] = useState<OpsWorkflow | null>(null)
   const [workflowRuns, setWorkflowRuns] = useState<Record<string, number>>({})
   const [workflowFeedback, setWorkflowFeedback] = useState<{ title: string; detail: string } | null>(null)
-
-  const routeFilteredAssets = useMemo(
-    () => filterAssetsByRoute(allAssets, selectedRoute),
-    [selectedRoute],
-  )
 
   const snapshot = useMemo(() => buildRouteSnapshot(selectedRoute), [selectedRoute])
   const workflows = useMemo<OpsWorkflow[]>(
@@ -105,12 +106,17 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
   )
 
   useEffect(() => {
-    if (routeFilteredAssets.length === 0) return
-    const stillVisible = routeFilteredAssets.some((a) => a.id === selectedAsset.id)
-    if (!stillVisible) {
-      setSelectedAsset(routeFilteredAssets[0])
+    if (scopedFundingAssets.length === 0) {
+      setSelectedAsset(null)
+      return
     }
-  }, [routeFilteredAssets, selectedAsset.id])
+    setSelectedAsset((prev) => {
+      if (!prev) return scopedFundingAssets[0]
+      const prevRid = String(prev.rid ?? '')
+      const stillVisible = scopedFundingAssets.some((a) => String(a.rid ?? '') === prevRid)
+      return stillVisible ? prev : scopedFundingAssets[0]
+    })
+  }, [scopedFundingAssets])
 
   useEffect(() => {
     if (!workflowFeedback) return
@@ -125,6 +131,8 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
       detail: workflow.resultMessage,
     })
   }
+  void workflows
+  void OpsWorkflowTile
 
   return (
     <>
@@ -155,6 +163,7 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
 
         <SensorHealthStrip />
 
+        {/*
         <section className="fc-panel p-3 sm:p-4">
           <p className="fc-eyebrow mb-3">Operational orchestration hub</p>
           <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
@@ -173,6 +182,7 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
             ))}
           </div>
         </section>
+        */}
 
         <section className="fc-panel p-3 sm:p-4">
           <h3 className="fc-eyebrow mb-3 flex items-center gap-2 text-[11px]">
@@ -219,17 +229,23 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
               </p>
               <div className="space-y-2">
                 <div className="rounded-lg border border-slate-100 bg-slate-50/70 px-2.5 py-2">
-                  <p className="text-[11px] font-semibold text-slate-900">{selectedAsset.name}</p>
-                  <p className="text-[10px] text-slate-600">{selectedAsset.assetType}</p>
+                  <p className="text-[11px] font-semibold text-slate-900">
+                    {String(selectedAsset?.name_as ?? selectedAsset?.rid ?? 'No asset selected')}
+                  </p>
+                  <p className="text-[10px] text-slate-600">{String(selectedAsset?.category ?? '—')}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="rounded-lg border border-slate-100 bg-slate-50/70 px-2.5 py-2">
                     <p className="text-[9px] font-semibold uppercase text-slate-500">Status</p>
-                    <p className="text-[11px] font-semibold capitalize text-slate-800">{selectedAsset.status}</p>
+                    <p className="text-[11px] font-semibold capitalize text-slate-800">
+                      {String(selectedAsset?.lifecycle_state ?? 'Unknown')}
+                    </p>
                   </div>
                   <div className="rounded-lg border border-slate-100 bg-slate-50/70 px-2.5 py-2">
                     <p className="text-[9px] font-semibold uppercase text-slate-500">Threat</p>
-                    <p className="text-[11px] font-semibold text-slate-800">{selectedAsset.threatLevel}</p>
+                    <p className="text-[11px] font-semibold text-slate-800">
+                      {String(selectedAsset?.security_label ?? 'Unknown')}
+                    </p>
                   </div>
                 </div>
                 <div className="rounded-lg border border-slate-100 bg-slate-50/70 px-2.5 py-2">
@@ -269,7 +285,7 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
               ))}
             </div>
           </div>
-          <SecurityPosture metrics={controlMetrics} />
+          <SecurityPosture metrics={snapshot.controlMetrics} />
         </section>
       </main>
 

@@ -1,13 +1,15 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibregl from 'maplibre-gl'
+import type { StyleSpecification } from 'maplibre-gl'
 import {
   AmbientLight,
   DirectionalLight,
   LightingEffect,
   WebMercatorViewport,
 } from '@deck.gl/core'
-import { Minus, Plus, Eye, EyeOff, RotateCcw, Layers, X, Box, LocateFixed, ChevronRight, ChevronDown } from 'lucide-react'
+import { Minus, Plus, Eye, EyeOff, RotateCcw, Layers, Flag, History, ShieldCheck, X, Box, LocateFixed, ChevronRight, ChevronDown } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import MapGL from 'react-map-gl/maplibre'
 import { ScaleControl } from 'react-map-gl/maplibre'
 import DeckGL from '@deck.gl/react'
@@ -16,6 +18,7 @@ import type { Position } from '@deck.gl/core'
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useEvents } from '@/context/EventsContext'
 import { cn } from '@/lib/utils'
 import { fundingMatchesRouteFilter } from '@/lib/assetFilters'
 import {
@@ -23,6 +26,7 @@ import {
   MAP_ASSET_CATEGORIES,
   MAP_ASSET_RGB,
   drawFundingIconDataUrl,
+  lineVisualForFeature,
   mapLegendLabel,
 } from '@/lib/mapVisuals'
 
@@ -30,10 +34,44 @@ import fundingData from '@/data/fin_funding.json'
 
 const FT_TO_M = 0.3048
 
+const IMAGERY_HYBRID_STYLE: StyleSpecification = {
+  version: 8,
+  name: 'Satellite',
+  sources: {
+    esriImagery: {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution:
+        '© Esri, Maxar, Earthstar Geographics — <a href="https://www.esri.com/">Esri</a>',
+    },
+    esriLabels: {
+      type: 'raster',
+      tiles: [
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+    },
+  },
+  layers: [
+    { id: 'imagery', type: 'raster', source: 'esriImagery' },
+    { id: 'labels', type: 'raster', source: 'esriLabels' },
+  ],
+}
+
 const MAP_STYLES = [
-  { id: 'light', label: 'Light 3D', url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' },
+  { id: 'satellite', label: 'Satellite', url: IMAGERY_HYBRID_STYLE },
+  { id: 'light', label: 'Light', url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' },
   { id: 'streets', label: 'Streets', url: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json' },
 ]
+
+const DEFAULT_3D_VIEW_STATE = {
+  longitude: -104.445773400222,
+  latitude: 32.8407536290268,
+  zoom: 16.2,
+  pitch: 60,
+  bearing: -26,
+}
 
 const ASSET_COLORS: Record<string, [number, number, number]> = MAP_ASSET_RGB
 
@@ -91,14 +129,16 @@ type TwinViewState = {
 }
 
 export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMapPanel3DProps) {
+  const { openEvents, createEvents, resolveEvent } = useEvents()
+  const navigate = useNavigate()
   const wrapRef = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState({ width: 1200, height: 700 })
   const [viewState, setViewState] = useState<TwinViewState>({
-    longitude: -91.422,
-    latitude: 44.792,
-    zoom: 15.2,
-    pitch: 60,
-    bearing: -26,
+    longitude: DEFAULT_3D_VIEW_STATE.longitude,
+    latitude: DEFAULT_3D_VIEW_STATE.latitude,
+    zoom: DEFAULT_3D_VIEW_STATE.zoom,
+    pitch: DEFAULT_3D_VIEW_STATE.pitch,
+    bearing: DEFAULT_3D_VIEW_STATE.bearing,
     maxPitch: 88,
     minZoom: 11.5,
     maxZoom: 20,
@@ -111,6 +151,31 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
   const [visibleCategories, setVisibleCategories] = useState<Set<string>>(
     () => new Set(MAP_ASSET_CATEGORIES),
   )
+  const legendDetails = useMemo(() => {
+    const details: Record<string, string[]> = {}
+    const dist = (fundingData as Record<string, any[]>)['Distribution Fiber'] ?? []
+    const drop = (fundingData as Record<string, any[]>)['Drop Fiber'] ?? []
+
+    const distLabels = Array.from(
+      new Set(
+        dist.map((item) => {
+          const size = item.size ?? item.connectivity_logic?.size
+          const placement = String(item.placement ?? item.connectivity_logic?.placement ?? '').trim().toUpperCase() || 'N/A'
+          return size ? `${size}, ${placement}` : placement
+        }),
+      ),
+    )
+    if (distLabels.length > 0) details['Distribution Fiber'] = distLabels
+
+    const dropLabels = Array.from(
+      new Set(
+        drop.map((item) => String(item.placement ?? item.connectivity_logic?.placement ?? '').trim().toUpperCase() || 'N/A'),
+      ),
+    )
+    if (dropLabels.length > 0) details['Drop Fiber'] = dropLabels
+
+    return details
+  }, [])
 
   const iconUrlByCategory = useMemo(() => {
     const urls: Record<string, string> = {}
@@ -119,6 +184,7 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
     })
     return urls
   }, [])
+  const eventIconUrl = useMemo(() => drawFundingIconDataUrl('Event Warning', '#ef4444'), [])
 
   useLayoutEffect(() => {
     const el = wrapRef.current
@@ -235,6 +301,14 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
   }, [selectedAsset])
 
   const selectedRid = (selectedAsset as { rid?: string } | null)?.rid
+  const openEventPoints = useMemo(
+    () =>
+      openEvents.map((event) => ({
+        ...event,
+        position: [event.longitude, event.latitude, 0] as Position,
+      })),
+    [openEvents],
+  )
 
   const pointLayer = useMemo(
     () =>
@@ -260,7 +334,10 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
         },
         getSize: (d) => {
           const rid = (d as { rid?: string }).rid
-          return rid && rid === selectedRid ? 32 : 24
+          const category = (d as { category?: string }).category
+          const isSplice = category === 'Drop Splice' || category === 'Distribution Splice'
+          if (rid && rid === selectedRid) return isSplice ? 128 : 64
+          return isSplice ? 96 : 48
         },
         onClick: (info) => {
           if (info.object) setSelectedAsset(info.object as Record<string, unknown>)
@@ -283,7 +360,7 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
         stroked: true,
         filled: true,
         diskResolution: 18,
-        radius: 0.42,
+        radius: 0.84,
         radiusUnits: 'meters',
         lineWidthUnits: 'meters',
         getPosition: (d) => {
@@ -292,7 +369,7 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
         },
         getElevation: (d) => {
           const category = (d as { category?: string }).category ?? 'POLE'
-          return POINT_3D_STYLE[category]?.height ?? 1.4
+          return (POINT_3D_STYLE[category]?.height ?? 1.4) * 2
         },
         getFillColor: (d) => {
           const category = (d as { category?: string }).category ?? 'POLE'
@@ -329,13 +406,21 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
         miterLimit: 4,
         getPath: (d) => d.path,
         getColor: (d) => {
-          const c = d.color as [number, number, number]
-          const alpha = d.category === 'CONDUIT' ? 0.78 : 0.92
+          const category = d.category
+          const lineVisual = lineVisualForFeature(category, d as unknown as Record<string, unknown>)
+          const hex = lineVisual.color.replace('#', '')
+          const normalized = hex.length === 3 ? hex.split('').map((c) => `${c}${c}`).join('') : hex
+          const c: [number, number, number] = [
+            Number.parseInt(normalized.slice(0, 2), 16),
+            Number.parseInt(normalized.slice(2, 4), 16),
+            Number.parseInt(normalized.slice(4, 6), 16),
+          ]
+          const alpha = category === 'Distribution Fiber' ? 0.9 : 0.86
           return rgba(c, alpha)
         },
         getWidth: (d) => {
-          if (d.category === 'FIBER_DROP') return 0.3
-          if (d.category === 'FIBER_DIST') return 0.42
+          if (d.category === 'Drop Fiber') return 0.3
+          if (d.category === 'Distribution Fiber') return 0.42
           return 0.56
         },
         onClick: (info) => {
@@ -345,7 +430,28 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
     [data.paths],
   )
 
-  const layers = useMemo(() => [pathLayer, pointDepthLayer, pointLayer], [pathLayer, pointDepthLayer, pointLayer])
+  const eventLayer = useMemo(
+    () =>
+      new IconLayer({
+        id: 'event-warning-icons',
+        data: openEventPoints,
+        pickable: false,
+        billboard: true,
+        sizeUnits: 'pixels',
+        sizeScale: 1,
+        getPosition: (d) => (d as { position: Position }).position,
+        getIcon: () => ({
+          url: eventIconUrl,
+          width: 64,
+          height: 64,
+          anchorY: 32,
+        }),
+        getSize: 42,
+      }),
+    [eventIconUrl, openEventPoints],
+  )
+
+  const layers = useMemo(() => [pathLayer, pointDepthLayer, pointLayer, eventLayer], [pathLayer, pointDepthLayer, pointLayer, eventLayer])
 
   const toggleCategory = (category: string) => {
     const next = new Set(visibleCategories)
@@ -358,6 +464,35 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
       next.add(category)
     }
     setVisibleCategories(next)
+  }
+
+  const eventCandidates = useMemo(
+    () =>
+      data.points.map((point) => {
+        const item = point as Record<string, any>
+        const position = item.position as number[]
+        return {
+          assetRid: String(item.rid ?? item.guid ?? 'Asset'),
+          assetName: String(item.name_as ?? item.rid ?? 'Asset'),
+          category: String(item.category ?? 'Unknown'),
+          longitude: Number(position[0]),
+          latitude: Number(position[1]),
+        }
+      }),
+    [data.points],
+  )
+
+  function createRandomEvents() {
+    if (eventCandidates.length === 0) return
+    const shuffled = [...eventCandidates].sort(() => Math.random() - 0.5)
+    const count = Math.min(5, eventCandidates.length)
+    createEvents(shuffled.slice(0, count))
+  }
+
+  function resolveAllOpenEvents() {
+    if (openEvents.length === 0) return
+    const ids = openEvents.map((event) => event.id)
+    ids.forEach((id) => resolveEvent(id))
   }
 
   return (
@@ -425,7 +560,7 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
       >
         <div className={cn('flex items-center justify-between', !isLegendCollapsed && 'mb-3 border-b border-slate-200 pb-2')}>
           <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            Map legend
+            Legends
           </h4>
           <button
             type="button"
@@ -464,7 +599,14 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
                   >
                     <div className="flex items-center gap-2.5">
                       <AssetLegendIcon category={type} color={color} mode="2d" className="h-4 w-4" />
-                      <span className="text-[10px] font-semibold">{mapLegendLabel(type)}</span>
+                      <div className="text-left">
+                        <span className="block text-[10px] font-semibold">{mapLegendLabel(type)}</span>
+                        {legendDetails[type]?.length ? (
+                          <span className="block text-[8px] font-medium uppercase tracking-wide text-slate-400">
+                            {legendDetails[type].join(' | ')}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                     {isActive ? (
                       <Eye className="h-3 w-3 text-slate-400" />
@@ -511,6 +653,30 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
             title="Recenter to visible assets"
           >
             <LocateFixed className="h-4.5 w-4.5" />
+          </button>
+          <button
+            type="button"
+            onClick={createRandomEvents}
+            className="fc-control-btn"
+            title="Create Event"
+          >
+            <Flag className="h-5 w-5 text-rose-600" />
+          </button>
+          <button
+            type="button"
+            onClick={resolveAllOpenEvents}
+            className="fc-control-btn"
+            title="Fix Event"
+          >
+            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/events-history')}
+            className="fc-control-btn"
+            title="Events History"
+          >
+            <History className="h-5 w-5 text-slate-700" />
           </button>
           <button
             type="button"
@@ -615,6 +781,16 @@ export function GeoMapPanel3D({ selectedRoute, mapMode, onMapModeChange }: GeoMa
           </div>
         </div>
       )}
+      {/*
+      <EventFixModal
+        open={isFixModalOpen}
+        events={openEvents}
+        sessionTotal={fixSessionTotal}
+        resolvedCount={resolvedInSession}
+        onResolveCurrent={resolveCurrentEvent}
+        onClose={() => setIsFixModalOpen(false)}
+      />
+      */}
     </Card>
   )
 }

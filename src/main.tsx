@@ -4,13 +4,16 @@ import { BrowserRouter } from 'react-router-dom'
 
 import App from '@/App.tsx'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { EventsProvider } from '@/context/EventsContext'
 import '@/index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <TooltipProvider delay={200}>
-        <App />
+        <EventsProvider>
+          <App />
+        </EventsProvider>
       </TooltipProvider>
     </BrowserRouter>
   </StrictMode>,

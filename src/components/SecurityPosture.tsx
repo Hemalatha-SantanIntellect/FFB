@@ -3,8 +3,12 @@ import {
   ProgressIndicator,
   ProgressTrack,
 } from '@/components/ui/progress'
-import type { ControlMetric } from '@/data/mockData'
 import { cn } from '@/lib/utils'
+
+type ControlMetric = {
+  label: string
+  value: number
+}
 
 function toneForValue(value: number) {
   if (value >= 80) {

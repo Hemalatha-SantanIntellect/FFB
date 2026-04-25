@@ -16,7 +16,13 @@ export function AssetHealthPanel2() {
   const [isOpen, setIsOpen] = useState(false)
 
   // Extract layer names (POLE, CONDUIT, etc.) from the funding JSON
-  const layerKeys = useMemo(() => Object.keys(fundingData), [])
+  const layerKeys = useMemo(
+    () =>
+      Object.keys(fundingData).filter(
+        (key) => Array.isArray((fundingData as Record<string, unknown[]>)[key]) && (fundingData as Record<string, unknown[]>)[key].length > 0,
+      ),
+    [],
+  )
 
   const { healthy, warning, alertCount, total } = useMemo(() => {
     // 1. Resolve which assets to calculate based on the dropdown filter

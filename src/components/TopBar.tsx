@@ -2,9 +2,9 @@ import { useEffect, useRef, useState, useMemo } from 'react'
 import { Search, X } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 import finleyLogo from '@/assets/finley logo.jpg'
-import { routes } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
+import { fundingItemRouteLabel } from '@/lib/assetFilters'
 
 // Data Import
 import fundingData from '@/data/fin_funding.json'
@@ -50,6 +50,12 @@ export function TopBar({
     })
     return flat
   }, [])
+
+  const routeOptions = useMemo(() => {
+    const unique = new Set<string>()
+    allAssets.forEach((asset) => unique.add(fundingItemRouteLabel(asset)))
+    return ['All Routes', ...Array.from(unique).sort((a, b) => a.localeCompare(b))]
+  }, [allAssets])
 
   // Search logic: Filter by Name or RID
   const searchSuggestions = useMemo(() => {
@@ -102,7 +108,7 @@ export function TopBar({
                 end
                 className={({ isActive }) =>
                   cn(
-                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    'rounded-md px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
                     isActive
                       ? 'bg-slate-900 text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
@@ -115,7 +121,7 @@ export function TopBar({
                 to="/client-portal"
                 className={({ isActive }) =>
                   cn(
-                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    'rounded-md px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
                     isActive
                       ? 'bg-slate-900 text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
@@ -128,7 +134,7 @@ export function TopBar({
                 to="/command-center"
                 className={({ isActive }) =>
                   cn(
-                    'rounded-md px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
+                    'rounded-md px-3 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors',
                     isActive
                       ? 'bg-slate-900 text-white'
                       : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
@@ -195,7 +201,7 @@ export function TopBar({
                 onChange={(e) => onRouteChange(e.target.value)}
                 className="h-9 min-w-[160px] rounded-lg border border-slate-200 bg-white px-2.5 text-[13px] font-semibold text-slate-800 outline-none focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
               >
-                {routes.map((r) => <option key={r} value={r}>{r}</option>)}
+                {routeOptions.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
           </div>

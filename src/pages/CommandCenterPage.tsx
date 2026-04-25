@@ -212,6 +212,8 @@ export function CommandCenterPage({ selectedRoute }: CommandCenterPageProps) {
       detail: item.resultMessage,
     })
   }
+  void insights
+  void InsightTile
 
   useEffect(() => {
     if (!feedback) return
@@ -290,6 +292,7 @@ export function CommandCenterPage({ selectedRoute }: CommandCenterPageProps) {
         />
       </section>
 
+      {/*
       <section className="fc-panel p-3 sm:p-4">
         <p className="fc-eyebrow mb-3">Autonomous command orchestration</p>
         <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
@@ -308,6 +311,7 @@ export function CommandCenterPage({ selectedRoute }: CommandCenterPageProps) {
           ))}
         </div>
       </section>
+      */}
 
       {activeInsight && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
@@ -418,7 +422,7 @@ function TrendCard({
           </LineChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-2 flex items-center justify-between gap-2 text-[10px] font-semibold text-slate-600">
+      <div className="mt-2 flex items-center justify-center gap-4 text-[10px] font-semibold text-slate-600">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full" style={{ backgroundColor: lineA }} />
           {labelA}

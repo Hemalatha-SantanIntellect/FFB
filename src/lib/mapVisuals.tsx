@@ -1,52 +1,83 @@
-const CATEGORY_ORDER = [
-  'AERIAL_LOOP_COIL',
-  'ANCHOR',
-  'CONDUIT',
-  'EQUIPMENT',
-  'FIBER_DIST',
-  'FIBER_DROP',
-  'HANDHOLE',
-  'PEDESTAL',
-  'POLE',
-  'SPLICE_CASE',
-] as const
+import fundingData from '@/data/fin_funding.json'
 
-export type AssetCategory = (typeof CATEGORY_ORDER)[number]
-
-export const MAP_ASSET_PALETTE: Record<AssetCategory, string> = {
-  AERIAL_LOOP_COIL: '#0d9488',
-  ANCHOR: '#b45309',
-  CONDUIT: '#2563eb',
-  EQUIPMENT: '#4f46e5',
-  FIBER_DIST: '#7c3aed',
-  FIBER_DROP: '#db2777',
-  HANDHOLE: '#0891b2',
-  PEDESTAL: '#059669',
-  POLE: '#6b7280',
-  SPLICE_CASE: '#ea580c',
+const BASE_COLORS: Record<string, string> = {
+  'Service location': '#8b5a2b',
+  'Event Warning': '#ef4444',
+  'PON Cabinet': '#39ff14',
+  'Drop Splice': '#2563eb',
+  'Distribution Splice': '#ef4444',
+  Handhole: '#39ff14',
+  'Distribution Fiber': '#22c55e',
+  'Drop Fiber': '#7e22ce',
+  'Optical Line Terminal': '#0ea5e9',
 }
 
-export const MAP_ASSET_RGB: Record<AssetCategory, [number, number, number]> = {
-  AERIAL_LOOP_COIL: [13, 148, 136],
-  ANCHOR: [180, 83, 9],
-  CONDUIT: [37, 99, 235],
-  EQUIPMENT: [79, 70, 229],
-  FIBER_DIST: [124, 58, 237],
-  FIBER_DROP: [219, 39, 119],
-  HANDHOLE: [8, 145, 178],
-  PEDESTAL: [5, 150, 105],
-  POLE: [107, 114, 128],
-  SPLICE_CASE: [234, 88, 12],
-}
+const FALLBACK_COLORS = ['#0ea5e9', '#14b8a6', '#6366f1', '#f97316', '#a855f7', '#e11d48']
 
-export const MAP_ASSET_CATEGORIES: readonly AssetCategory[] = CATEGORY_ORDER
+export const MAP_ASSET_CATEGORIES: readonly string[] = Object.keys(
+  fundingData as Record<string, unknown[]>,
+).filter((key) => ((fundingData as Record<string, unknown[]>)[key] ?? []).length > 0)
+
+export const MAP_ASSET_PALETTE: Record<string, string> = MAP_ASSET_CATEGORIES.reduce(
+  (acc, category, index) => {
+    acc[category] = BASE_COLORS[category] ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length]
+    return acc
+  },
+  {} as Record<string, string>,
+)
+
+export const MAP_ASSET_RGB: Record<string, [number, number, number]> = Object.fromEntries(
+  Object.entries(MAP_ASSET_PALETTE).map(([category, color]) => {
+    const hex = color.replace('#', '')
+    const normalized = hex.length === 3 ? hex.split('').map((c) => `${c}${c}`).join('') : hex
+    const r = Number.parseInt(normalized.slice(0, 2), 16)
+    const g = Number.parseInt(normalized.slice(2, 4), 16)
+    const b = Number.parseInt(normalized.slice(4, 6), 16)
+    return [category, [r, g, b] as [number, number, number]]
+  }),
+)
 
 export function mapLegendLabel(value: string) {
-  return value.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, (s) => s.toUpperCase())
+  return value
 }
 
 export function isLinearCategory(value: string) {
-  return value === 'CONDUIT' || value === 'FIBER_DIST' || value === 'FIBER_DROP'
+  return value === 'Distribution Fiber' || value === 'Drop Fiber'
+}
+
+const DISTRIBUTION_FIBER_COLORS: Record<string, string> = {
+  '12': '#e5e91f',
+  '24': '#ef4444',
+  '48': '#39ff14',
+  '96': '#2563eb',
+  '144': '#f472d0',
+  '288': '#67d8ef',
+}
+
+export function lineVisualForFeature(category: string, feature: Record<string, unknown>) {
+  const connectivity = (feature.connectivity_logic ?? {}) as Record<string, unknown>
+  if (category === 'Distribution Fiber') {
+    const size = String(feature.size ?? connectivity.size ?? '').trim()
+    const placement = String(feature.placement ?? connectivity.placement ?? '').trim().toUpperCase()
+    return {
+      color: DISTRIBUTION_FIBER_COLORS[size] ?? MAP_ASSET_PALETTE[category] ?? '#22c55e',
+      dash: placement === 'AER' ? [2, 2] : undefined,
+    }
+  }
+  if (category === 'Drop Fiber') {
+    const placement = String(feature.placement ?? connectivity.placement ?? '').trim().toUpperCase()
+    if (placement && placement !== 'UG' && placement !== 'AER') {
+      return { color: '#94a3b8', dash: undefined }
+    }
+    return {
+      color: '#7e22ce',
+      dash: placement === 'AER' ? [2, 2] : undefined,
+    }
+  }
+  return {
+    color: MAP_ASSET_PALETTE[category] ?? '#64748b',
+    dash: undefined,
+  }
 }
 
 export function drawFundingIconImageData(type: string, color: string, size = 64): ImageData {
@@ -64,67 +95,94 @@ export function drawFundingIconImageData(type: string, color: string, size = 64)
   ctx.lineCap = 'round'
 
   switch (type) {
-    case 'POLE':
-      ctx.fillRect(cx - 4, 10, 8, 44)
-      ctx.fillRect(cx - 16, 15, 32, 6)
-      ctx.strokeRect(cx - 4, 10, 8, 44)
-      break
-    case 'PEDESTAL':
-      ctx.fillRect(cx - 15, cy - 20, 30, 40)
-      ctx.strokeRect(cx - 15, cy - 20, 30, 40)
-      break
-    case 'HANDHOLE':
+    case 'Service location':
+      ctx.fillStyle = '#f8fafc'
       ctx.beginPath()
-      ctx.ellipse(cx, cy, 22, 14, 0, 0, Math.PI * 2)
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
-      break
-    case 'SPLICE_CASE':
+      ctx.fillStyle = color
+      ctx.fillRect(cx - 9, cy - 4, 18, 10)
       ctx.beginPath()
-      ctx.moveTo(cx, cy - 20)
-      ctx.lineTo(cx + 20, cy)
-      ctx.lineTo(cx, cy + 20)
-      ctx.lineTo(cx - 20, cy)
+      ctx.moveTo(cx - 11, cy - 4)
+      ctx.lineTo(cx, cy - 12)
+      ctx.lineTo(cx + 11, cy - 4)
+      ctx.closePath()
+      ctx.fill()
+      ctx.fillStyle = '#fff'
+      ctx.fillRect(cx - 2.4, cy, 4.8, 6)
+      break
+    case 'Event Warning':
+      ctx.fillStyle = '#fda4af'
+      ctx.beginPath()
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.stroke()
+      ctx.fillStyle = '#dc2626'
+      ctx.fillRect(cx - 6, cy - 9, 2.5, 16)
+      ctx.beginPath()
+      ctx.moveTo(cx - 3.5, cy - 8)
+      ctx.lineTo(cx + 9, cy - 4)
+      ctx.lineTo(cx - 3.5, cy)
+      ctx.closePath()
+      ctx.fill()
+      break
+    case 'PON Cabinet':
+      ctx.beginPath()
+      for (let i = 0; i < 6; i += 1) {
+        const angle = ((60 * i - 30) * Math.PI) / 180
+        const px = cx + 13 * Math.cos(angle)
+        const py = cy + 13 * Math.sin(angle)
+        if (i === 0) ctx.moveTo(px, py)
+        else ctx.lineTo(px, py)
+      }
       ctx.closePath()
       ctx.fill()
       ctx.stroke()
       ctx.fillStyle = '#ffffff'
       ctx.beginPath()
-      ctx.arc(cx, cy, 4, 0, Math.PI * 2)
+      ctx.moveTo(cx, cy - 7)
+      ctx.lineTo(cx + 7, cy + 6)
+      ctx.lineTo(cx - 7, cy + 6)
+      ctx.closePath()
       ctx.fill()
       break
-    case 'ANCHOR':
+    case 'Drop Splice':
+    case 'Distribution Splice':
+      ctx.fillStyle = '#ffffff'
       ctx.beginPath()
-      ctx.moveTo(cx, cy - 10)
-      ctx.lineTo(cx + 15, cy + 15)
-      ctx.lineTo(cx - 15, cy + 15)
+      ctx.arc(cx, cy, 14, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = '#cbd5e1'
+      ctx.lineWidth = 2
+      ctx.stroke()
+      ctx.fillStyle = color
+      ctx.strokeStyle = '#0f172a'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.moveTo(cx - 10, cy - 6)
+      ctx.lineTo(cx - 2, cy)
+      ctx.lineTo(cx - 10, cy + 6)
       ctx.closePath()
       ctx.fill()
       ctx.stroke()
       ctx.beginPath()
-      ctx.moveTo(cx, cy - 10)
-      ctx.lineTo(cx, 5)
+      ctx.moveTo(cx + 10, cy - 6)
+      ctx.lineTo(cx + 2, cy)
+      ctx.lineTo(cx + 10, cy + 6)
+      ctx.closePath()
+      ctx.fill()
       ctx.stroke()
       break
-    case 'AERIAL_LOOP_COIL':
-      ctx.beginPath()
-      ctx.arc(cx, cy, 18, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.beginPath()
-      ctx.arc(cx, cy, 10, 0, Math.PI * 2)
-      ctx.stroke()
+    case 'Handhole':
+      ctx.fillRect(cx - 5, cy - 5, 10, 10)
+      ctx.strokeRect(cx - 5, cy - 5, 10, 10)
       break
-    case 'EQUIPMENT':
-      ctx.fillRect(cx - 18, cy - 18, 36, 36)
-      ctx.strokeRect(cx - 18, cy - 18, 36, 36)
-      ctx.beginPath()
-      ctx.moveTo(cx - 18, cy - 18)
-      ctx.lineTo(cx + 18, cy + 18)
-      ctx.stroke()
-      ctx.beginPath()
-      ctx.moveTo(cx + 18, cy - 18)
-      ctx.lineTo(cx - 18, cy + 18)
-      ctx.stroke()
+    case 'Optical Line Terminal':
+      ctx.fillRect(cx - 13, cy - 7, 26, 14)
+      ctx.strokeRect(cx - 13, cy - 7, 26, 14)
+      ctx.fillStyle = '#ffffff'
+      ctx.fillRect(cx - 7, cy - 1, 14, 2)
       break
     default:
       ctx.beginPath()
@@ -166,7 +224,7 @@ export function AssetLegendIcon({ category, color, mode = '2d', className }: Leg
             stroke={color}
             strokeWidth="4"
             strokeLinecap="round"
-            strokeDasharray={category === 'FIBER_DROP' ? '4 4' : category === 'FIBER_DIST' ? '7 3' : '0'}
+            strokeDasharray={category === 'Drop Fiber' ? '4 4' : category === 'Distribution Fiber' ? '7 3' : '0'}
           />
           <path
             d="M4 26c5.2-4 10-5.8 14.5-5.4 4.6.4 8.6 2.3 13.5 5.4"
@@ -198,7 +256,7 @@ export function AssetLegendIcon({ category, color, mode = '2d', className }: Leg
           stroke={color}
           strokeWidth="3.5"
           strokeLinecap="round"
-          strokeDasharray={category === 'FIBER_DROP' ? '4 4' : category === 'FIBER_DIST' ? '7 3' : '0'}
+          strokeDasharray={category === 'Drop Fiber' ? '4 4' : category === 'Distribution Fiber' ? '7 3' : '0'}
         />
       </svg>
     )
@@ -212,38 +270,36 @@ export function AssetLegendIcon({ category, color, mode = '2d', className }: Leg
       aria-hidden
     >
       <circle cx="18" cy="18" r="14" fill={`${color}18`} />
-      {category === 'POLE' && (
+      {category === 'Service location' && (
         <>
-          <rect x="16" y="8" width="4" height="20" rx="1" fill={color} />
-          <rect x="11" y="11" width="14" height="3" rx="1" fill={color} />
+          <circle cx="18" cy="18" r="12" fill="#f8fafc" stroke="#cbd5e1" />
+          <path d="M10 17h16v8H10z" fill={color} />
+          <path d="m9 17 9-6 9 6H9Z" fill={color} />
+          <rect x="16.2" y="19" width="3.6" height="5.8" fill="#fff" />
         </>
       )}
-      {category === 'PEDESTAL' && <rect x="11" y="9" width="14" height="18" rx="2" fill={color} />}
-      {category === 'HANDHOLE' && <ellipse cx="18" cy="18" rx="9" ry="6" fill={color} />}
-      {category === 'SPLICE_CASE' && (
+      {category === 'Event Warning' && (
         <>
-          <path d="M18 8 27 18 18 28 9 18 18 8Z" fill={color} />
-          <circle cx="18" cy="18" r="2.2" fill="#fff" />
+          <circle cx="18" cy="18" r="12" fill="#fda4af" stroke="#f43f5e" />
+          <rect x="13.4" y="10.3" width="1.9" height="13.4" fill="#dc2626" />
+          <path d="M15.4 10.8 24.2 13.8 15.4 16.5Z" fill="#dc2626" />
         </>
       )}
-      {category === 'ANCHOR' && (
+      {category === 'PON Cabinet' && (
         <>
-          <path d="M18 9 25 21H11l7-12Z" fill={color} />
-          <path d="M18 9v-4" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M18 6.8 27 12v10L18 27.2 9 22V12l9-5.2Z" fill={color} />
+          <path d="M18 12.2 22.6 20h-9.2L18 12.2Z" fill="#fff" />
         </>
       )}
-      {category === 'AERIAL_LOOP_COIL' && (
+      {(category === 'Drop Splice' || category === 'Distribution Splice') && (
         <>
-          <circle cx="18" cy="18" r="8.8" stroke={color} strokeWidth="3" />
-          <circle cx="18" cy="18" r="4.4" stroke={color} strokeWidth="2.5" />
+          <circle cx="18" cy="18" r="12" fill="#ffffff" stroke="#cbd5e1" />
+          <path d="M8.5 12.5 15 18l-6.5 5.5v-11Z" fill={color} />
+          <path d="M27.5 12.5 21 18l6.5 5.5v-11Z" fill={color} />
         </>
       )}
-      {category === 'EQUIPMENT' && (
-        <>
-          <rect x="10.5" y="10.5" width="15" height="15" rx="1.8" fill={color} />
-          <path d="M11.8 11.8l12.4 12.4M24.2 11.8 11.8 24.2" stroke="#fff" strokeOpacity="0.9" strokeWidth="1.5" />
-        </>
-      )}
+      {category === 'Handhole' && <rect x="13" y="13" width="10" height="10" rx="1.2" fill={color} />}
+      {category === 'Optical Line Terminal' && <rect x="9" y="13" width="18" height="10" rx="1.5" fill={color} />}
     </svg>
   )
 }

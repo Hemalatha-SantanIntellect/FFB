@@ -1,5 +1,6 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 import maplibregl from 'maplibre-gl'
+import type { StyleSpecification } from 'maplibre-gl'
 import { 
   Minus, 
   Plus, 
@@ -7,6 +8,9 @@ import {
   EyeOff, 
   RotateCcw, 
   Layers, 
+  Flag,
+  History,
+  ShieldCheck,
   X, 
   LocateFixed, 
   ChevronRight, 
@@ -15,26 +19,61 @@ import {
   ExternalLink
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Map, { Layer, ScaleControl, Source } from 'react-map-gl/maplibre'
 import type { MapRef } from 'react-map-gl/maplibre'
 
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useEvents } from '@/context/EventsContext'
 import { cn } from '@/lib/utils'
 import {
   AssetLegendIcon,
   MAP_ASSET_CATEGORIES,
   MAP_ASSET_PALETTE,
   drawFundingIconImageData,
+  lineVisualForFeature,
   mapLegendLabel,
 } from '@/lib/mapVisuals'
 
 import fundingData from '@/data/fin_funding.json'
 
+const IMAGERY_HYBRID_STYLE: StyleSpecification = {
+  version: 8,
+  name: 'Satellite',
+  sources: {
+    esriImagery: {
+      type: 'raster',
+      tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+      tileSize: 256,
+      attribution:
+        '© Esri, Maxar, Earthstar Geographics — <a href="https://www.esri.com/">Esri</a>',
+    },
+    esriLabels: {
+      type: 'raster',
+      tiles: [
+        'https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+    },
+  },
+  layers: [
+    { id: 'imagery', type: 'raster', source: 'esriImagery' },
+    { id: 'labels', type: 'raster', source: 'esriLabels' },
+  ],
+}
+
 const MAP_STYLES = [
+  { id: 'satellite', label: 'Satellite', url: IMAGERY_HYBRID_STYLE },
   { id: 'light', label: 'Light', url: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' },
   { id: 'streets', label: 'Streets', url: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json' },
 ]
+
+const DEFAULT_2D_VIEW_STATE = {
+  longitude: -104.445773400222,
+  latitude: 32.8407536290268,
+  zoom: 16.3,
+}
 
 const PRIORITY_COLORS: Record<string, string> = {
   '1': '#ef4444', // Red
@@ -48,6 +87,12 @@ type GeoMapPanel2Props = {
 }
 
 export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
+  const { openEvents, createEvents, resolveEvent } = useEvents()
+  const navigate = useNavigate()
+  const iconIdForCategory = useCallback(
+    (category: string) => `icon-${category.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+    [],
+  )
   const mapRef = useRef<MapRef>(null)
   const [selectedAsset, setSelectedAsset] = useState<any>(null)
   const [iconsLoaded, setIconsLoaded] = useState(false)
@@ -116,7 +161,7 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
         const props = {
           ...item,
           category,
-          iconId: `icon-${category}`,
+          iconId: iconIdForCategory(category),
           color: MAP_ASSET_PALETTE[category as keyof typeof MAP_ASSET_PALETTE] || '#64748b',
           hasIncident: !!incident,
           incidentPriority: incident?.priority || '3',
@@ -131,27 +176,62 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
             geometry: { type: 'Point', coordinates: [item.geometry.x, item.geometry.y] } 
           })
         } else if (item.geometry.paths) {
+          const lineVisual = lineVisualForFeature(category, item)
           lines.features.push({ 
             type: 'Feature', 
             id: item.rid, 
-            properties: props, 
+            properties: {
+              ...props,
+              lineColor: lineVisual.color,
+              lineDash: lineVisual.dash ?? null,
+            }, 
             geometry: { type: 'LineString', coordinates: item.geometry.paths[0].map((p: any) => [p[0], p[1]]) } 
           })
         }
       })
     })
     return { points, lines }
-  }, [incidents])
+  }, [iconIdForCategory, incidents])
 
   const mapFilter = useMemo(() => ['in', ['get', 'category'], ['literal', Array.from(visibleCategories)]], [visibleCategories])
+  const legendDetails = useMemo(() => {
+    const details: Record<string, string[]> = {}
+    const dist = (fundingData as Record<string, any[]>)['Distribution Fiber'] ?? []
+    const drop = (fundingData as Record<string, any[]>)['Drop Fiber'] ?? []
+
+    const distLabels = Array.from(
+      new Set(
+        dist.map((item) => {
+          const size = item.size ?? item.connectivity_logic?.size
+          const placement = String(item.placement ?? item.connectivity_logic?.placement ?? '').trim().toUpperCase() || 'N/A'
+          return size ? `${size}, ${placement}` : placement
+        }),
+      ),
+    )
+    if (distLabels.length > 0) details['Distribution Fiber'] = distLabels
+
+    const dropLabels = Array.from(
+      new Set(
+        drop.map((item) => String(item.placement ?? item.connectivity_logic?.placement ?? '').trim().toUpperCase() || 'N/A'),
+      ),
+    )
+    if (dropLabels.length > 0) details['Drop Fiber'] = dropLabels
+
+    return details
+  }, [])
 
   const registerIcons = useCallback((map: maplibregl.Map) => {
     Object.entries(MAP_ASSET_PALETTE).forEach(([type, color]) => {
       const imgData = drawFundingIconImageData(type, color)
-      if (!map.hasImage(`icon-${type}`)) map.addImage(`icon-${type}`, imgData, { pixelRatio: 2 })
+      const iconId = iconIdForCategory(type)
+      if (!map.hasImage(iconId)) map.addImage(iconId, imgData, { pixelRatio: 2 })
     })
+    if (!map.hasImage('event-warning-flag')) {
+      const warningImg = drawFundingIconImageData('Event Warning', '#ef4444')
+      map.addImage('event-warning-flag', warningImg, { pixelRatio: 2 })
+    }
     setIconsLoaded(true)
-  }, [])
+  }, [iconIdForCategory])
 
   const onMapLoad = useCallback((e: any) => {
     registerIcons(e.target)
@@ -185,13 +265,59 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
     map.fitBounds([sw, ne], { padding: 70, duration: 900 })
   }, [geoData, visibleCategories])
 
+  const openEventFeatures = useMemo(
+    () => ({
+      type: 'FeatureCollection',
+      features: openEvents.map((event) => ({
+        type: 'Feature',
+        id: event.id,
+        properties: {
+          id: event.id,
+          assetRid: event.assetRid,
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [event.longitude, event.latitude],
+        },
+      })),
+    }),
+    [openEvents],
+  )
+
+  const eventCandidates = useMemo(
+    () =>
+      geoData.points.features
+        .filter((feature: any) => visibleCategories.has(feature.properties.category))
+        .map((feature: any) => ({
+          assetRid: String(feature.properties.rid ?? feature.properties.guid ?? feature.id),
+          assetName: String(feature.properties.name_as ?? feature.properties.rid ?? 'Asset'),
+          category: String(feature.properties.category ?? 'Unknown'),
+          longitude: Number(feature.geometry.coordinates[0]),
+          latitude: Number(feature.geometry.coordinates[1]),
+        })),
+    [geoData.points.features, visibleCategories],
+  )
+
+  function createRandomEvents() {
+    if (eventCandidates.length === 0) return
+    const shuffled = [...eventCandidates].sort(() => Math.random() - 0.5)
+    const count = Math.min(5, eventCandidates.length)
+    createEvents(shuffled.slice(0, count))
+  }
+
+  function resolveAllOpenEvents() {
+    if (openEvents.length === 0) return
+    const ids = openEvents.map((event) => event.id)
+    ids.forEach((id) => resolveEvent(id))
+  }
+
   return (
     <Card className="fc-panel fc-map-2d relative flex min-h-[580px] flex-1 overflow-hidden bg-slate-50/60">
       <Map
         ref={mapRef}
         mapLib={maplibregl}
         mapStyle={currentStyle}
-        initialViewState={{ longitude: -91.422, latitude: 44.792, zoom: 14.5 }}
+        initialViewState={DEFAULT_2D_VIEW_STATE}
         onLoad={onMapLoad}
         onStyleData={(e) => registerIcons(e.target)}
         onClick={(e) => {
@@ -205,11 +331,20 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
             setSelectedAsset(null);
           }
         }}
-        interactiveLayerIds={['funding-points', 'funding-lines', 'incident-glow']}
+        interactiveLayerIds={['funding-points', 'funding-lines', 'incident-glow', 'event-warnings']}
         style={{ width: '100%', height: '100%' }}
       >
         <Source id="lines-src" type="geojson" data={geoData.lines}>
-          <Layer id="funding-lines" type="line" filter={mapFilter as any} paint={{ 'line-color': ['get', 'color'], 'line-width': 3.5, 'line-opacity': 0.8 }} />
+          <Layer
+            id="funding-lines"
+            type="line"
+            filter={mapFilter as any}
+            paint={{ 'line-color': ['get', 'lineColor'], 'line-width': 3.5, 'line-opacity': 0.85 }}
+            layout={{
+              'line-join': 'round',
+              'line-cap': 'round',
+            }}
+          />
         </Source>
 
         {iconsLoaded && (
@@ -230,17 +365,43 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
               id="funding-points" 
               type="symbol" 
               filter={mapFilter as any} 
-              layout={{ 'icon-image': ['get', 'iconId'], 'icon-size': 0.55, 'icon-allow-overlap': true }} 
+              layout={{
+                'icon-image': ['get', 'iconId'],
+                'icon-size': [
+                  'case',
+                  [
+                    'any',
+                    ['==', ['get', 'category'], 'Drop Splice'],
+                    ['==', ['get', 'category'], 'Distribution Splice'],
+                  ],
+                  1.1,
+                  ['any', ['==', ['get', 'category'], 'Distribution Fiber'], ['==', ['get', 'category'], 'Drop Fiber']],
+                  0.55,
+                  1.1,
+                ],
+                'icon-allow-overlap': true,
+              }} 
             />
           </Source>
         )}
+        <Source id="events-src" type="geojson" data={openEventFeatures as any}>
+          <Layer
+            id="event-warnings"
+            type="symbol"
+            layout={{
+              'icon-image': 'event-warning-flag',
+              'icon-size': 0.95,
+              'icon-allow-overlap': true,
+            }}
+          />
+        </Source>
         <ScaleControl position="top-right" />
       </Map>
 
       {/* Legend / Filters */}
       <div className={cn('absolute left-3 top-3 z-10 rounded-xl border border-slate-200 bg-white/95 p-3 shadow-xl backdrop-blur-md w-[220px]', isLegendCollapsed && 'w-[132px]')}>
         <div className={cn('flex items-center justify-between', !isLegendCollapsed && 'mb-3 border-b pb-2')}>
-          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Finley Legend</h4>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Legends</h4>
           <button onClick={() => setIsLegendCollapsed(!isLegendCollapsed)} className="rounded p-1 text-slate-500 hover:bg-slate-100">
             {isLegendCollapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
@@ -255,7 +416,14 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
               <button key={type} onClick={() => toggleCategory(type)} className={cn('flex w-full items-center justify-between rounded-md px-2 py-1.5 transition-all', visibleCategories.has(type) ? 'opacity-100' : 'opacity-30 grayscale')}>
                 <div className="flex items-center gap-2.5">
                   <AssetLegendIcon category={type} color={color} className="h-4 w-4" />
-                  <span className="text-[10px] font-semibold text-slate-700">{mapLegendLabel(type)}</span>
+                  <div className="text-left">
+                    <span className="block text-[10px] font-semibold text-slate-700">{mapLegendLabel(type)}</span>
+                    {legendDetails[type]?.length ? (
+                      <span className="block text-[8px] font-medium uppercase tracking-wide text-slate-400">
+                        {legendDetails[type].join(' | ')}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
                 {visibleCategories.has(type) ? <Eye className="h-3 w-3 text-slate-400" /> : <EyeOff className="h-3 w-3 text-slate-300" />}
               </button>
@@ -283,6 +451,27 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
           </div>
         )}
         <button onClick={fitToAssets} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><LocateFixed className="h-4.5 w-4.5" /></button>
+        <button
+          onClick={createRandomEvents}
+          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"
+          title="Create Event"
+        >
+          <Flag className="h-5 w-5 text-rose-600" />
+        </button>
+        <button
+          onClick={resolveAllOpenEvents}
+          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"
+          title="Fix Event"
+        >
+          <ShieldCheck className="h-5 w-5 text-emerald-600" />
+        </button>
+        <button
+          onClick={() => navigate('/events-history')}
+          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"
+          title="Events History"
+        >
+          <History className="h-5 w-5 text-slate-700" />
+        </button>
         <button onClick={() => setShowStyleMenu(!showStyleMenu)} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><Layers className="h-5 w-5" /></button>
         <div className="flex flex-col rounded-lg border border-slate-200 bg-white shadow-md">
           <button onClick={() => mapRef.current?.getMap().zoomIn()} className="border-b p-2.5 hover:bg-slate-100"><Plus className="h-4 w-4" /></button>
@@ -334,6 +523,16 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
           </div>
         </div>
       )}
+      {/*
+      <EventFixModal
+        open={isFixModalOpen}
+        events={openEvents}
+        sessionTotal={fixSessionTotal}
+        resolvedCount={resolvedInSession}
+        onResolveCurrent={resolveCurrentEvent}
+        onClose={() => setIsFixModalOpen(false)}
+      />
+      */}
     </Card>
   )
 }
