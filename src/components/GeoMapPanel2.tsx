@@ -265,24 +265,7 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
     map.fitBounds([sw, ne], { padding: 70, duration: 900 })
   }, [geoData, visibleCategories])
 
-  const openEventFeatures = useMemo(
-    () => ({
-      type: 'FeatureCollection',
-      features: openEvents.map((event) => ({
-        type: 'Feature',
-        id: event.id,
-        properties: {
-          id: event.id,
-          assetRid: event.assetRid,
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: [event.longitude, event.latitude],
-        },
-      })),
-    }),
-    [openEvents],
-  )
+
 
   const eventCandidates = useMemo(
     () =>
@@ -297,6 +280,34 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
         })),
     [geoData.points.features, visibleCategories],
   )
+
+
+const openEventFeatures = useMemo(
+  () => ({
+    type: 'FeatureCollection',
+    features: openEvents.map((event) => {
+      const asset = eventCandidates.find((c: any) => c.assetRid === event.assetRid);
+      
+      return {
+        type: 'Feature',
+        id: event.id,
+        properties: {
+          id: event.id,
+          assetRid: event.assetRid,
+          category: 'Event Warning',
+          // Dynamically include the asset category in the title
+          name_as: `Event Warning Trigger: ${asset?.category || 'Asset'}`, 
+          isEventFlag: true
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: [event.longitude, event.latitude],
+        },
+      };
+    }),
+  }),
+  [openEvents, eventCandidates],
+);
 
   function createRandomEvents() {
     if (eventCandidates.length === 0) return
@@ -323,9 +334,25 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
         onClick={(e) => {
           const feature = e.features?.[0];
           if (feature) {
+            if (feature.properties.isEventFlag) {
+              const realAsset = geoData.points.features.find(
+                (f: any) => String(f.properties.rid ?? f.properties.guid) === feature.properties.assetRid
+              );
+              if (realAsset) {
+                setSelectedAsset({
+                  ...realAsset.properties,
+                  // Updated naming format
+                  name_as: `Event Warning Trigger: ${realAsset.properties.category || 'Asset'}`,
+                  sn_incident: incidents[realAsset.properties.guid],
+                  isCritical: true // Add this flag
+                });
+                return;
+              }
+            }
             setSelectedAsset({
               ...feature.properties,
-              sn_incident: incidents[feature.properties.guid]
+              sn_incident: incidents[feature.properties.guid],
+              isCritical: !!incidents[feature.properties.guid] // Critical if incident exists
             });
           } else {
             setSelectedAsset(null);
@@ -493,7 +520,8 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
           <h3 className="text-base font-bold text-slate-900">{selectedAsset.name_as || 'Unnamed Asset'}</h3>
           
           <div className="mt-4 space-y-2 border-t pt-3">
-            {selectedAsset.sn_incident ? (
+            {/* Show the Incident box if it exists */}
+            {selectedAsset.sn_incident && (
               <div className="mb-3 rounded-lg border border-red-100 bg-red-50 p-3 ring-1 ring-red-200">
                 <div className="mb-1.5 flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-700 uppercase">
@@ -504,20 +532,22 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
                   </Badge>
                 </div>
                 <p className="text-[11px] font-bold text-slate-900 leading-tight">{selectedAsset.sn_incident.short_description}</p>
-                <a 
-                  href={`https://accelareincdemo7.service-now.com/nav_to.do?uri=incident.do?sys_id=${selectedAsset.sn_incident.sys_id}`} 
-                  target="_blank" rel="noopener noreferrer"
-                  className="mt-2 flex items-center gap-1 text-[9px] font-bold text-red-700 hover:underline"
-                >
+                <a href={`https://accelareincdemo7.service-now.com/nav_to.do?uri=incident.do?sys_id=${selectedAsset.sn_incident.sys_id}`} target="_blank" rel="noopener noreferrer" className="mt-2 flex items-center gap-1 text-[9px] font-bold text-red-700 hover:underline" >
                   Open ServiceNow <ExternalLink className="h-2.5 w-2.5" />
                 </a>
               </div>
-            ) : (
-              <div className="flex justify-between text-xs">
-                <span className="text-slate-500">Device Health:</span>
-                <span className="font-bold text-emerald-600 uppercase">Operational</span>
-              </div>
             )}
+
+            {/* Health Status Logic: Check the isCritical flag we just added */}
+            <div className="flex justify-between text-xs">
+              <span className="text-slate-500">Device Health:</span>
+              {selectedAsset.isCritical ? (
+                <span className="font-bold text-red-600 uppercase animate-pulse">Critical</span>
+              ) : (
+                <span className="font-bold text-emerald-600 uppercase">Operational</span>
+              )}
+            </div>
+
             <div className="flex justify-between text-xs"><span className="text-slate-500">Lifecycle:</span><span className="font-semibold">{selectedAsset.lifecycle_state}</span></div>
             <div className="flex justify-between text-xs"><span className="text-slate-500">Exchange:</span><span className="font-semibold">{selectedAsset.exchange || 'Truax'}</span></div>
           </div>

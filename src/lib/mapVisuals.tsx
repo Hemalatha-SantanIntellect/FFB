@@ -131,8 +131,8 @@ export function drawFundingIconImageData(type: string, color: string, size = 64)
       ctx.beginPath()
       for (let i = 0; i < 6; i += 1) {
         const angle = ((60 * i - 30) * Math.PI) / 180
-        const px = cx + 13 * Math.cos(angle)
-        const py = cy + 13 * Math.sin(angle)
+        const px = cx + 18 * Math.cos(angle)
+        const py = cy + 18 * Math.sin(angle)
         if (i === 0) ctx.moveTo(px, py)
         else ctx.lineTo(px, py)
       }
@@ -149,31 +149,29 @@ export function drawFundingIconImageData(type: string, color: string, size = 64)
       break
     case 'Drop Splice':
     case 'Distribution Splice':
-      ctx.fillStyle = '#ffffff'
-      ctx.beginPath()
-      ctx.arc(cx, cy, 14, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.strokeStyle = '#cbd5e1'
-      ctx.lineWidth = 2
-      ctx.stroke()
-      ctx.fillStyle = color
-      ctx.strokeStyle = '#0f172a'
-      ctx.lineWidth = 3
-      ctx.beginPath()
-      ctx.moveTo(cx - 10, cy - 6)
-      ctx.lineTo(cx - 2, cy)
-      ctx.lineTo(cx - 10, cy + 6)
-      ctx.closePath()
-      ctx.fill()
-      ctx.stroke()
-      ctx.beginPath()
-      ctx.moveTo(cx + 10, cy - 6)
-      ctx.lineTo(cx + 2, cy)
-      ctx.lineTo(cx + 10, cy + 6)
-      ctx.closePath()
-      ctx.fill()
-      ctx.stroke()
-      break
+      // Removed ctx.arc (the white circle) and the cbd5e1 stroke
+      ctx.fillStyle = color;
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 3;
+
+      // Left Triangle (Enlarged)
+      ctx.beginPath();
+      ctx.moveTo(cx - 18, cy - 12); // Moved further out and up
+      ctx.lineTo(cx - 4, cy);      // Centered more
+      ctx.lineTo(cx - 18, cy + 12); // Moved further out and down
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Right Triangle (Enlarged)
+      ctx.beginPath();
+      ctx.moveTo(cx + 18, cy - 12);
+      ctx.lineTo(cx + 4, cy);
+      ctx.lineTo(cx + 18, cy + 12);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
     case 'Handhole':
       ctx.fillRect(cx - 5, cy - 5, 10, 10)
       ctx.strokeRect(cx - 5, cy - 5, 10, 10)
@@ -278,24 +276,35 @@ export function AssetLegendIcon({ category, color, mode = '2d', className }: Leg
           <rect x="16.2" y="19" width="3.6" height="5.8" fill="#fff" />
         </>
       )}
-      {category === 'Event Warning' && (
-        <>
-          <circle cx="18" cy="18" r="12" fill="#fda4af" stroke="#f43f5e" />
-          <rect x="13.4" y="10.3" width="1.9" height="13.4" fill="#dc2626" />
-          <path d="M15.4 10.8 24.2 13.8 15.4 16.5Z" fill="#dc2626" />
-        </>
-      )}
+{category === 'Event Warning' && (
+  <g>
+    <style>{`
+      @keyframes pulse-blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+      }
+      .warning-blink {
+        animation: pulse-blink 1s infinite;
+      }
+    `}</style>
+    <g className="warning-blink">
+      <circle cx="18" cy="18" r="12" fill="#fda4af" stroke="#f43f5e" />
+      <rect x="13.4" y="10.3" width="1.9" height="13.4" fill="#dc2626" />
+      <path d="M15.4 10.8 24.2 13.8 15.4 16.5Z" fill="#dc2626" />
+    </g>
+  </g>
+)}
       {category === 'PON Cabinet' && (
         <>
           <path d="M18 6.8 27 12v10L18 27.2 9 22V12l9-5.2Z" fill={color} />
           <path d="M18 12.2 22.6 20h-9.2L18 12.2Z" fill="#fff" />
         </>
       )}
-      {(category === 'Drop Splice' || category === 'Distribution Splice') && (
+     {(category === 'Drop Splice' || category === 'Distribution Splice') && (
         <>
-          <circle cx="18" cy="18" r="12" fill="#ffffff" stroke="#cbd5e1" />
-          <path d="M8.5 12.5 15 18l-6.5 5.5v-11Z" fill={color} />
-          <path d="M27.5 12.5 21 18l6.5 5.5v-11Z" fill={color} />
+          {/* Removed the circle and stroke */}
+          <path d="M4 8 L14 18 L4 28 Z" fill={color} stroke="#0f172a" strokeWidth="1.5" />
+          <path d="M32 8 L22 18 L32 28 Z" fill={color} stroke="#0f172a" strokeWidth="1.5" />
         </>
       )}
       {category === 'Handhole' && <rect x="13" y="13" width="10" height="10" rx="1.2" fill={color} />}
