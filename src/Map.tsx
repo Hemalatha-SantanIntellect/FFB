@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import WebMap from '@arcgis/core/WebMap.js';
 import MapView from '@arcgis/core/views/MapView.js';
 import '@arcgis/core/assets/esri/themes/light/main.css';
-
+// 
 const MapDashboard = () => {
   const mapDiv = useRef(null);
   const [activeMapId, setActiveMapId] = useState('a1e59770fbbc44b2b71172112fa96124');
