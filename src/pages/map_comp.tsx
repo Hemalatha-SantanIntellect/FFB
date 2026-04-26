@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import MapView from '@arcgis/core/views/MapView';
 import Map from '@arcgis/core/Map';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
@@ -11,7 +11,7 @@ import '@arcgis/core/assets/esri/themes/light/main.css';
 
 const CREDENTIALS = {
   username: import.meta.env.VITE_ARCGIS_USERNAME,
-  password: import.meta.env. VITE_ARCGIS_PASSWORD,
+  password: import.meta.env.VITE_ARCGIS_PASSWORD,
   portalUrl: 'https://feccorp.maps.arcgis.com/sharing/rest',
   serviceUrl: import.meta.env.VITE_ARCGIS_SERVICE_ROOT
 };
@@ -54,10 +54,10 @@ export const ArcGISMap = () => {
         });
 
         view = new MapView({
-          container: mapDiv.current!,
-          map: map,
-          padding: { top: 10 }
-        });
+  container: mapDiv.current!,
+  map: map,
+  padding: { top: 10, right: 0, bottom: 0, left: 0 } // Add the missing properties
+});
 
         // 3. Add the Basemap Toggle UI (Collapsed by default)
         const bgWidget = new BasemapGallery({
@@ -65,12 +65,12 @@ export const ArcGISMap = () => {
           container: document.createElement("div") // Create node for the widget
         });
 
-        const bgExpand = new Expand({
-          view: view,
-          content: bgWidget.container, // Pass the DOM node
-          expandIcon: "basemap",       // Standard icon for basemaps
-          expanded: false              // Starts closed
-        });
+      const bgExpand = new Expand({
+  view: view,
+  content: bgWidget, // Expand can take the widget object directly
+  expandIcon: "basemap",
+  expanded: false
+});
 
         view.ui.add(bgExpand, "top-right");
 
