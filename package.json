@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@arcgis/core": "^5.0.17",
+    "@arcgis/map-components": "^5.0.18",
     "@base-ui/react": "^1.4.0",
     "@deck.gl/core": "^9.3.0",
     "@deck.gl/layers": "^9.3.0",

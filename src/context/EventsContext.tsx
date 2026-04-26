@@ -13,6 +13,8 @@ type CreateEventInput = {
   category: string
   longitude: number
   latitude: number
+  // ADD THIS LINE
+  arcgisFid?: number
 }
 
 type EventsContextValue = {
@@ -37,22 +39,24 @@ export function EventsProvider({ children }: { children: ReactNode }) {
     const openEvents = sorted.filter((event) => event.status === 'open')
     const fixedEvents = sorted.filter((event) => event.status === 'fixed')
 
-    function createEvents(items: CreateEventInput[]) {
-      const timestamp = new Date().toISOString()
-      const created = items.map((item) => ({
-        id: createEventId(),
-        assetRid: item.assetRid,
-        assetName: item.assetName,
-        category: item.category,
-        longitude: item.longitude,
-        latitude: item.latitude,
-        status: 'open' as const,
-        createdAt: timestamp,
-        fixedAt: null,
-      }))
-      setEvents((prev) => [...created, ...prev])
-      return created
-    }
+function createEvents(items: CreateEventInput[]) {
+  const timestamp = new Date().toISOString()
+  const created = items.map((item) => ({
+    id: createEventId(),
+    assetRid: item.assetRid,
+    assetName: item.assetName,
+    category: item.category,
+    longitude: item.longitude,
+    latitude: item.latitude,
+    status: 'open' as const,
+    createdAt: timestamp,
+    fixedAt: null,
+    // ADD THIS LINE
+    arcgisFid: item.arcgisFid, 
+  }))
+  setEvents((prev) => [...created, ...prev])
+  return created
+}
 
     function resolveEvent(eventId: string) {
       const fixedAt = new Date().toISOString()

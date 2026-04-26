@@ -14,6 +14,7 @@ import { fundingMatchesRouteFilter } from '@/lib/assetFilters'
 import { buildRouteSnapshot } from '@/lib/routeMetrics'
 import { eventSeverityBadgeClass } from '@/lib/severityChips'
 import { cn } from '@/lib/utils'
+import {ArcGISMap} from './map_comp'
 
 const SECURITY_POSTURE_LEGEND = [
   { label: '≥80%', swatch: 'bg-emerald-500', title: 'Strong' },
@@ -160,6 +161,8 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
             <AssetHealthPanel2 />
           </div>
         </section>
+
+        <ArcGISMap />
 
         <SensorHealthStrip />
 

@@ -10,6 +10,8 @@ export type MapEventRecord = {
   status: MapEventStatus
   createdAt: string
   fixedAt: string | null
+  // ADD THIS LINE
+  arcgisFid?: number;
 }
 
 const EVENTS_DB_KEY = 'fusioncenter.events.db.v1'

@@ -16,7 +16,8 @@ import {
   ChevronRight, 
   ChevronDown,
   AlertTriangle,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -37,6 +38,7 @@ import {
 } from '@/lib/mapVisuals'
 
 import fundingData from '@/data/fin_funding.json'
+import { syncAddFlagToArcGIS, syncDeleteFlagFromArcGIS } from '@/services/arcgisService'
 
 const IMAGERY_HYBRID_STYLE: StyleSpecification = {
   version: 8,
@@ -106,6 +108,9 @@ export function GeoMapPanel2({ mapMode, onMapModeChange }: GeoMapPanel2Props) {
   // Incident & Animation States
   const [incidents, setIncidents] = useState<Record<string, any>>({})
   const [pulseOpacity, setPulseOpacity] = useState(1)
+
+  const [isCreating, setIsCreating] = useState(false)
+const [isResolving, setIsResolving] = useState(false)
 
   // 1. Fetch Incidents for Finley USA
   useEffect(() => {
@@ -309,18 +314,39 @@ const openEventFeatures = useMemo(
   [openEvents, eventCandidates],
 );
 
-  function createRandomEvents() {
-    if (eventCandidates.length === 0) return
+async function createRandomEvents() {
+  if (eventCandidates.length === 0) return
+  setIsCreating(true) // Start loading
+  try {
     const shuffled = [...eventCandidates].sort(() => Math.random() - 0.5)
-    const count = Math.min(5, eventCandidates.length)
-    createEvents(shuffled.slice(0, count))
-  }
+    const selected = shuffled.slice(0, Math.min(5, eventCandidates.length))
 
-  function resolveAllOpenEvents() {
-    if (openEvents.length === 0) return
-    const ids = openEvents.map((event) => event.id)
-    ids.forEach((id) => resolveEvent(id))
+    const newEvents = []
+    for (const event of selected) {
+      const fid = await syncAddFlagToArcGIS(event.longitude, event.latitude)
+      newEvents.push({ ...event, arcgisFid: fid })
+    }
+    createEvents(newEvents)
+  } finally {
+    setIsCreating(false) // Stop loading
   }
+}
+
+// Inside GeoMapPanel2 component
+async function resolveAllOpenEvents() {
+  if (openEvents.length === 0) return
+  setIsResolving(true) // Start loading
+  try {
+    for (const event of openEvents) {
+      if (event.arcgisFid) {
+        await syncDeleteFlagFromArcGIS(event.arcgisFid)
+      }
+      resolveEvent(event.id)
+    }
+  } finally {
+    setIsResolving(false) // Stop loading
+  }
+}
 
   return (
     <Card className="fc-panel fc-map-2d relative flex min-h-[580px] flex-1 overflow-hidden bg-slate-50/60">
@@ -480,17 +506,28 @@ const openEventFeatures = useMemo(
         <button onClick={fitToAssets} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><LocateFixed className="h-4.5 w-4.5" /></button>
         <button
           onClick={createRandomEvents}
-          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"
+          disabled={isCreating}
+          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200 disabled:opacity-50"
           title="Create Event"
         >
-          <Flag className="h-5 w-5 text-rose-600" />
+          {isCreating ? (
+            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+          ) : (
+            <Flag className="h-5 w-5 text-rose-600" />
+          )}
         </button>
+
         <button
           onClick={resolveAllOpenEvents}
-          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"
+          disabled={isResolving}
+          className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200 disabled:opacity-50"
           title="Fix Event"
         >
-          <ShieldCheck className="h-5 w-5 text-emerald-600" />
+          {isResolving ? (
+            <Loader2 className="h-5 w-5 animate-spin text-slate-400" />
+          ) : (
+            <ShieldCheck className="h-5 w-5 text-emerald-600" />
+          )}
         </button>
         <button
           onClick={() => navigate('/events-history')}
