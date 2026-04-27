@@ -38,7 +38,10 @@ import {
 } from '@/lib/mapVisuals'
 
 import fundingData from '@/data/fin_funding.json'
-import { syncAddFlagToArcGIS, syncDeleteFlagFromArcGIS } from '@/services/arcgisService'
+import {
+  resolveAllOpenEventsOnArcgis,
+  runHealthMonitoringAgentMapFlow,
+} from '@/lib/mapEventArcgisSync'
 
 const IMAGERY_HYBRID_STYLE: StyleSpecification = {
   version: 8,
@@ -328,144 +331,6 @@ const openEventFeatures = useMemo(
   [openEvents, eventCandidates],
 );
 
-async function triggerHealthMonitoringAgent() {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY?.trim();
-  if (!apiKey) return;
-
-  setIsCreating(true);
-  console.group("🤖 Health Monitoring Agent: Startup");
-  
-  const SN_INSTANCE = 'https://accelareincdemo7.service-now.com';
-  const auth = btoa('gautham_api_interface:AccelareDemo7#');
-
-  try {
-    const aiResponse = await fetch('https://corsproxy.io/?https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [{
-          role: "system",
-          content: "Generate 5 health monitor events for ONT devices. Format as a JSON array of objects. Fields: node (ONT-Node-001 to ONT-Node-030), type, description, severity (integer 1-5), additional_info: 'Event was created by Health Monitoring Agent for finley'."
-        }],
-        response_format: { type: "json_object" }
-      })
-    });
-
-    const aiData = await aiResponse.json();
-    const cleanContent = aiData.choices[0].message.content.replace(/[\u00A0]/g, ' ');
-    const parsed = JSON.parse(cleanContent);
-    const simulatedEvents = parsed.events || [];
-
-    const newEventsForState = [];
-
-    for (const event of simulatedEvents) {
-      console.log(`Processing AI Event for: ${event.node}`);
-
-      // 1. CMDB Lookup
-      const cmdbRes = await fetch(
-        `${SN_INSTANCE}/api/now/table/cmdb_ci_ni_telco_equipment?sysparm_query=name=${event.node}&sysparm_fields=location.latitude,location.longitude,sys_id,name`,
-        { headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' } }
-      );
-      const cmdbData = await cmdbRes.json();
-      const asset = cmdbData.result?.[0];
-
-      if (asset) {
-        const lat = asset['location.latitude'] ? parseFloat(asset['location.latitude']) : null;
-        const lng = asset['location.longitude'] ? parseFloat(asset['location.longitude']) : null;
-
-        // 2. Matching Local Data (CRITICAL STEP)
-        // We find the local ONT in your JSON by matching the name
-        const localMatch = eventCandidates.find((c: any) => c.assetName === event.node);
-
-        // Determine coordinates: Prioritize SN, fallback to Local JSON
-        const finalLat = lat || localMatch?.latitude;
-        const finalLng = lng || localMatch?.longitude;
-
-        if (finalLat && finalLng) {
-          // 3. Create ServiceNow Event
-          const eventRes = await fetch(`${SN_INSTANCE}/api/now/table/em_event`, {
-            method: 'POST',
-            headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              source: "ONTData",
-              node: event.node,
-              type: event.type,
-              severity: event.severity.toString(),
-              description: event.description,
-              additional_info: event.additional_info,
-              resource: event.node,
-              time_of_event: new Date().toISOString().replace('T', ' ').split('.')[0]
-            })
-          });
-          const eventResult = await eventRes.json();
-
-          // 4. Sync to ArcGIS
-          const arcgisFid = await syncAddFlagToArcGIS(finalLng, finalLat);
-
-          // 5. Push to state using the localMatch RID (e.g. "ONT:10")
-          // This ensures the flag links to the correct dot on the map
-          newEventsForState.push({
-            assetRid: localMatch ? localMatch.assetRid : asset.sys_id,
-            assetName: event.node,
-            category: 'ONT',
-            longitude: finalLng,
-            latitude: finalLat,
-            arcgisFid: arcgisFid,
-            eventId: eventResult.result?.sys_id
-          });
-        }
-      }
-    }
-
-    console.log("Updating map with new flags:", newEventsForState);
-    createEvents(newEventsForState);
-    
-  } catch (error) {
-    console.error("Health Agent Error:", error);
-  } finally {
-    setIsCreating(false);
-    console.groupEnd();
-  }
-}
-
-async function createRandomEvents() {
-  if (eventCandidates.length === 0) return
-  setIsCreating(true) // Start loading
-  try {
-    const shuffled = [...eventCandidates].sort(() => Math.random() - 0.5)
-    const selected = shuffled.slice(0, Math.min(5, eventCandidates.length))
-
-    const newEvents = []
-    for (const event of selected) {
-      const fid = await syncAddFlagToArcGIS(event.longitude, event.latitude)
-      newEvents.push({ ...event, arcgisFid: fid })
-    }
-    createEvents(newEvents)
-  } finally {
-    setIsCreating(false) // Stop loading
-  }
-}
-
-// Inside GeoMapPanel2 component
-async function resolveAllOpenEvents() {
-  if (openEvents.length === 0) return
-  setIsResolving(true) // Start loading
-  try {
-    for (const event of openEvents) {
-      if (event.arcgisFid) {
-        await syncDeleteFlagFromArcGIS(event.arcgisFid)
-      }
-      resolveEvent(event.id)
-    }
-  } finally {
-    setIsResolving(false) // Stop loading
-  }
-}
-
   return (
     <Card className="fc-panel fc-map-2d relative flex min-h-[580px] flex-1 overflow-hidden bg-slate-50/60">
       <Map
@@ -623,7 +488,13 @@ async function resolveAllOpenEvents() {
         )}
         <button onClick={fitToAssets} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><LocateFixed className="h-4.5 w-4.5" /></button>
         <button
-          onClick={triggerHealthMonitoringAgent}
+          onClick={() => {
+            void runHealthMonitoringAgentMapFlow(
+              eventCandidates,
+              createEvents,
+              setIsCreating,
+            )
+          }}
           disabled={isCreating}
           className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200 disabled:opacity-50"
           title="Create Event"
@@ -636,7 +507,13 @@ async function resolveAllOpenEvents() {
         </button>
 
         <button
-          onClick={resolveAllOpenEvents}
+          onClick={() => {
+            void resolveAllOpenEventsOnArcgis(
+              openEvents,
+              resolveEvent,
+              setIsResolving,
+            )
+          }}
           disabled={isResolving}
           className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200 disabled:opacity-50"
           title="Fix Event"
