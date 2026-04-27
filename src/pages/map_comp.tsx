@@ -96,19 +96,15 @@ export const ArcGISMap = () => {
 
         // 4. Auto-zoom
    // 4. Auto-zoom with TypeScript safety
-layers[layers.length - 1].when(() => {
-  const extent = layers[layers.length - 1].fullExtent;
-  
-  // Use a type guard to ensure extent is not null/undefined
-  if (extent) {
-    view.goTo(extent, { duration: 1500 }).catch((err) => {
-      if (err.name !== "AbortError") {
-        console.error("View.goTo failed:", err);
-      }
+layers[3].when(() => {
+  if (layers[3].fullExtent) {
+    view.goTo({
+      target: layers[3].fullExtent,
+      zoom: 17.5 // Set your desired zoom level here (0 is world, 20 is street)
+    }, { 
+      duration: 1500,
+      easing: "ease-in-out" 
     });
-  } else {
-    console.warn("Layer loaded but fullExtent is undefined. Falling back to default center.");
-    // Optional: view.goTo({ center: [-104.44, 32.84], zoom: 16 });
   }
 });
 
