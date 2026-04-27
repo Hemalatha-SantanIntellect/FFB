@@ -272,19 +272,33 @@ const query = 'company.nameLIKEFinley USA^correlation_idISNOTEMPTY^state!=7';
 
 
 
+  // const eventCandidates = useMemo(
+  //   () =>
+  //     geoData.points.features
+  //       .filter((feature: any) => visibleCategories.has(feature.properties.category))
+  //       .map((feature: any) => ({
+  //         assetRid: String(feature.properties.rid ?? feature.properties.guid ?? feature.id),
+  //         assetName: String(feature.properties.name_as ?? feature.properties.rid ?? 'Asset'),
+  //         category: String(feature.properties.category ?? 'Unknown'),
+  //         longitude: Number(feature.geometry.coordinates[0]),
+  //         latitude: Number(feature.geometry.coordinates[1]),
+  //       })),
+  //   [geoData.points.features, visibleCategories],
+  // )
+
   const eventCandidates = useMemo(
-    () =>
-      geoData.points.features
-        .filter((feature: any) => visibleCategories.has(feature.properties.category))
-        .map((feature: any) => ({
-          assetRid: String(feature.properties.rid ?? feature.properties.guid ?? feature.id),
-          assetName: String(feature.properties.name_as ?? feature.properties.rid ?? 'Asset'),
-          category: String(feature.properties.category ?? 'Unknown'),
-          longitude: Number(feature.geometry.coordinates[0]),
-          latitude: Number(feature.geometry.coordinates[1]),
-        })),
-    [geoData.points.features, visibleCategories],
-  )
+  () => geoData.points.features
+    .filter((feature: any) => visibleCategories.has(feature.properties.category))
+    .map((feature: any) => ({
+      // Handle both standard name_as and ONT'S EQUIP_NAME
+      assetRid: String(feature.properties.rid ?? feature.properties.guid ?? feature.id),
+      assetName: String(feature.properties.EQUIP_NAME ?? feature.properties.name_as ?? feature.properties.rid ?? 'Asset'),
+      category: String(feature.properties.category ?? 'Unknown'),
+      longitude: Number(feature.geometry.coordinates[0]),
+      latitude: Number(feature.geometry.coordinates[1]),
+    })),
+  [geoData.points.features, visibleCategories],
+)
 
 
 const openEventFeatures = useMemo(
@@ -313,6 +327,110 @@ const openEventFeatures = useMemo(
   }),
   [openEvents, eventCandidates],
 );
+
+async function triggerHealthMonitoringAgent() {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY?.trim();
+  if (!apiKey) return;
+
+  setIsCreating(true);
+  console.group("🤖 Health Monitoring Agent: Startup");
+  
+  const SN_INSTANCE = 'https://accelareincdemo7.service-now.com';
+  const auth = btoa('gautham_api_interface:AccelareDemo7#');
+
+  try {
+    const aiResponse = await fetch('https://corsproxy.io/?https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [{
+          role: "system",
+          content: "Generate 5 health monitor events for ONT devices. Format as a JSON array of objects. Fields: node (ONT-Node-001 to ONT-Node-030), type, description, severity (integer 1-5), additional_info: 'Event was created by Health Monitoring Agent for finley'."
+        }],
+        response_format: { type: "json_object" }
+      })
+    });
+
+    const aiData = await aiResponse.json();
+    const cleanContent = aiData.choices[0].message.content.replace(/[\u00A0]/g, ' ');
+    const parsed = JSON.parse(cleanContent);
+    const simulatedEvents = parsed.events || [];
+
+    const newEventsForState = [];
+
+    for (const event of simulatedEvents) {
+      console.log(`Processing AI Event for: ${event.node}`);
+
+      // 1. CMDB Lookup
+      const cmdbRes = await fetch(
+        `${SN_INSTANCE}/api/now/table/cmdb_ci_ni_telco_equipment?sysparm_query=name=${event.node}&sysparm_fields=location.latitude,location.longitude,sys_id,name`,
+        { headers: { 'Authorization': `Basic ${auth}`, 'Accept': 'application/json' } }
+      );
+      const cmdbData = await cmdbRes.json();
+      const asset = cmdbData.result?.[0];
+
+      if (asset) {
+        const lat = asset['location.latitude'] ? parseFloat(asset['location.latitude']) : null;
+        const lng = asset['location.longitude'] ? parseFloat(asset['location.longitude']) : null;
+
+        // 2. Matching Local Data (CRITICAL STEP)
+        // We find the local ONT in your JSON by matching the name
+        const localMatch = eventCandidates.find((c: any) => c.assetName === event.node);
+
+        // Determine coordinates: Prioritize SN, fallback to Local JSON
+        const finalLat = lat || localMatch?.latitude;
+        const finalLng = lng || localMatch?.longitude;
+
+        if (finalLat && finalLng) {
+          // 3. Create ServiceNow Event
+          const eventRes = await fetch(`${SN_INSTANCE}/api/now/table/em_event`, {
+            method: 'POST',
+            headers: { 'Authorization': `Basic ${auth}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source: "ONTData",
+              node: event.node,
+              type: event.type,
+              severity: event.severity.toString(),
+              description: event.description,
+              additional_info: event.additional_info,
+              resource: event.node,
+              time_of_event: new Date().toISOString().replace('T', ' ').split('.')[0]
+            })
+          });
+          const eventResult = await eventRes.json();
+
+          // 4. Sync to ArcGIS
+          const arcgisFid = await syncAddFlagToArcGIS(finalLng, finalLat);
+
+          // 5. Push to state using the localMatch RID (e.g. "ONT:10")
+          // This ensures the flag links to the correct dot on the map
+          newEventsForState.push({
+            assetRid: localMatch ? localMatch.assetRid : asset.sys_id,
+            assetName: event.node,
+            category: 'ONT',
+            longitude: finalLng,
+            latitude: finalLat,
+            arcgisFid: arcgisFid,
+            eventId: eventResult.result?.sys_id
+          });
+        }
+      }
+    }
+
+    console.log("Updating map with new flags:", newEventsForState);
+    createEvents(newEventsForState);
+    
+  } catch (error) {
+    console.error("Health Agent Error:", error);
+  } finally {
+    setIsCreating(false);
+    console.groupEnd();
+  }
+}
 
 async function createRandomEvents() {
   if (eventCandidates.length === 0) return
@@ -505,7 +623,7 @@ async function resolveAllOpenEvents() {
         )}
         <button onClick={fitToAssets} className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200"><LocateFixed className="h-4.5 w-4.5" /></button>
         <button
-          onClick={createRandomEvents}
+          onClick={triggerHealthMonitoringAgent}
           disabled={isCreating}
           className="fc-control-btn bg-white shadow-md rounded-lg p-2 border border-slate-200 disabled:opacity-50"
           title="Create Event"
