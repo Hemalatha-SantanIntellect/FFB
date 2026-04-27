@@ -192,14 +192,27 @@ async function getEventWarningLayerUrl(token: string) {
 /**
  * CREATE: Adds a flag and returns the FID (OBJECTID)
  */
+/**
+ * CREATE: Adds a flag and returns the FID (OBJECTID)
+ * @param lon - Expects negative value (~-104)
+ * @param lat - Expects positive value (~32)
+ */
 export async function syncAddFlagToArcGIS(lon: number, lat: number) {
   const token = await getToken();
-  const layerUrl = await getEventWarningLayerUrl(token); // Dynamic URL instead of hardcoded /6/
+  const layerUrl = await getEventWarningLayerUrl(token);
 
+  // Explicitly mapping variables to ensure ArcGIS gets X=Longitude and Y=Latitude
   const editParams = new URLSearchParams({
     adds: JSON.stringify([{
-      attributes: { Latitude: lat, Longitude: lon },
-      geometry: { x: lon, y: lat, spatialReference: { wkid: 4326 } }
+      attributes: { 
+        Latitude: lat,  // Maps to the column in your ArcGIS table
+        Longitude: lon 
+      },
+      geometry: { 
+        x: lon, // ArcGIS X is always Longitude
+        y: lat, // ArcGIS Y is always Latitude
+        spatialReference: { wkid: 4326 } 
+      }
     }]),
     f: 'json',
     token: token
@@ -209,23 +222,22 @@ export async function syncAddFlagToArcGIS(lon: number, lat: number) {
   const result = await res.json()
 
   if (result.error) {
-    const e = (result.error as { message?: string; details?: string } | string)
-    const msg = typeof e === 'string' ? e : (e.message ?? e.details ?? JSON.stringify(e))
-    throw new Error(`applyEdits: ${msg}`)
+    const e = result.error
+    throw new Error(`applyEdits: ${e.message || JSON.stringify(e)}`)
   }
-  // MapServer/FeatureService: { addResults: [ { objectId, success, error? } ] }
+
   const addResults = Array.isArray(result) ? result[0].addResults : result.addResults
   const first = addResults?.[0]
+  
   if (first && first.success === false) {
-    const err = (first as { error?: { description?: string; message?: string } | string }).error
-    const msg = typeof err === 'string' ? err : (err?.description || err?.message || JSON.stringify(err))
-    throw new Error(`applyEdits add failed: ${msg ?? 'success=false'}`)
+    throw new Error(`applyEdits add failed: ${first.error?.description || 'Unknown error'}`)
   }
+
   const oid = first?.objectId
   if (oid == null) {
-    console.error('[arcgis] applyEdits full response', result)
-    throw new Error('applyEdits: no objectId returned; check field names and edit permissions')
+    throw new Error('applyEdits: no objectId returned')
   }
+  
   return oid
 }
 
@@ -243,4 +255,39 @@ export async function syncDeleteFlagFromArcGIS(fid: number) {
   });
 
   await fetch(`${layerUrl}/deleteFeatures`, { method: 'POST', body: deleteParams });
+}
+
+
+/**
+ * DELETE ALL: Finds all features in the Event Warning layer and clears them
+ */
+export async function syncClearAllFlagsFromArcGIS() {
+  const token = await getToken();
+  const layerUrl = await getEventWarningLayerUrl(token);
+
+  // 1. Query for all ObjectIDs (FIDs) currently in the layer
+  const queryParams = new URLSearchParams({
+    where: "1=1", // Get everything
+    returnIdsOnly: "true",
+    f: "json",
+    token: token
+  });
+
+  const queryRes = await fetch(`${layerUrl}/query?${queryParams}`);
+  const queryData = await queryRes.json();
+  const objectIds = queryData.objectIds;
+
+  if (objectIds && objectIds.length > 0) {
+    // 2. Delete all found IDs
+    const deleteParams = new URLSearchParams({
+      objectIds: objectIds.join(','),
+      f: 'json',
+      token: token
+    });
+    
+    const delRes = await fetch(`${layerUrl}/deleteFeatures`, { method: 'POST', body: deleteParams });
+    return await delRes.json();
+  }
+  
+  return { success: true, message: "No flags to delete" };
 }

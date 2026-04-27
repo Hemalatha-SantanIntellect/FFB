@@ -149,7 +149,7 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
 
         <section className="flex flex-col gap-3">
           <div className="grid gap-3 xl:grid-cols-[minmax(0,7fr)_minmax(280px,3fr)]">
-            {mapMode === '3D' ? (
+            {/* {mapMode === '3D' ? (
               <GeoMapPanel3D
                 selectedRoute={selectedRoute}
                 mapMode={mapMode}
@@ -157,12 +157,13 @@ export function OperationsDashboardPage({ selectedRoute }: OperationsDashboardPa
               />
             ) : (
               <GeoMapPanel2 mapMode={mapMode} onMapModeChange={setMapMode} />
-            )}
+            )} */}
+            <ArcGISMap />
             <AssetHealthPanel2 />
           </div>
         </section>
 
-        <ArcGISMap />
+        {/* <ArcGISMap /> */}
 
         <SensorHealthStrip />
 

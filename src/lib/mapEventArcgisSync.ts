@@ -47,13 +47,7 @@ export async function runHealthMonitoringAgentMapFlow(
 ) {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY?.trim()
   if (!apiKey) {
-    await addRandomMapEventsToArcgis(
-      eventCandidates,
-      createEvents,
-      setCreating,
-      onArcgisMutationComplete,
-      MAP_CREATE_EVENT_FLAG_COUNT,
-    )
+    await addRandomMapEventsToArcgis(eventCandidates, createEvents, setCreating, onArcgisMutationComplete, MAP_CREATE_EVENT_FLAG_COUNT)
     return
   }
 
@@ -64,19 +58,10 @@ export async function runHealthMonitoringAgentMapFlow(
   try {
     const aiResponse = await fetch('https://corsproxy.io/?https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content:
-              "Generate 5 health monitor events for ONT devices. Format as a JSON array of objects. Fields: node (ONT-Node-001 to ONT-Node-030), type, description, severity (integer 1-5), additional_info: 'Event was created by Health Monitoring Agent for finley'.",
-          },
-        ],
+        messages: [{ role: 'system', content: "Generate 5 health monitor events for ONT devices. Format as a JSON array of objects. Fields: node (ONT-Node-001 to ONT-Node-030), type, description, severity (integer 1-5), additional_info: 'Event was created by Health Monitoring Agent for finley'." }],
         response_format: { type: 'json_object' },
       }),
     })
@@ -85,32 +70,40 @@ export async function runHealthMonitoringAgentMapFlow(
     const cleanContent = aiData.choices[0].message.content.replace(/[\u00A0]/g, ' ')
     const parsed = JSON.parse(cleanContent)
     const simulatedEvents = parsed.events || []
-    newEventsForState = []
 
     for (const event of simulatedEvents) {
-      if (newEventsForState.length >= MAP_CREATE_EVENT_FLAG_COUNT) {
-        break
-      }
-      console.log(`Processing AI Event for: ${event.node}`)
+      if (newEventsForState.length >= MAP_CREATE_EVENT_FLAG_COUNT) break
 
-      const cmdbRes = await fetch(
-        `${SN_INSTANCE}/api/now/table/cmdb_ci_ni_telco_equipment?sysparm_query=name=${
-          event.node
-        }&sysparm_fields=location.latitude,location.longitude,sys_id,name`,
-        { headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' } },
-      )
+      console.log(`🔍 Processing Node: ${event.node}`)
+      const cmdbRes = await fetch(`${SN_INSTANCE}/api/now/table/cmdb_ci_ni_telco_equipment?sysparm_query=name=${event.node}&sysparm_fields=location.latitude,location.longitude,sys_id,name`, {
+        headers: { Authorization: `Basic ${auth}`, Accept: 'application/json' }
+      })
       const cmdbData = await cmdbRes.json()
       const asset = cmdbData.result?.[0]
 
       if (asset) {
-        const lat = asset['location.latitude'] ? parseFloat(asset['location.latitude']) : null
-        const lng = asset['location.longitude'] ? parseFloat(asset['location.longitude']) : null
+        let rawLat = asset['location.latitude'] ? parseFloat(asset['location.latitude']) : null
+        let rawLng = asset['location.longitude'] ? parseFloat(asset['location.longitude']) : null
+
+        // --- COORDINATE VALIDATION LOGIC ---
+        // For Arizona/New Mexico: Lat should be +32.x, Lng should be -104.x
+        // If rawLat is negative and rawLng is positive, they are definitely interchanged in the source.
+        let validatedLat = rawLat;
+        let validatedLng = rawLng;
+
+        if (rawLat && rawLng && rawLat < 0 && rawLng > 0) {
+          console.warn(`🔄 Auto-correcting swapped coordinates for ${event.node}`);
+          validatedLat = rawLng;
+          validatedLng = rawLat;
+        }
 
         const localMatch = eventCandidates.find((c) => c.assetName === event.node)
-        const finalLat = lat || localMatch?.latitude
-        const finalLng = lng || localMatch?.longitude
+        const finalLat = validatedLat || localMatch?.latitude
+        const finalLng = validatedLng || localMatch?.longitude
 
         if (finalLat && finalLng) {
+          console.log(`📍 Using Validated Coords for ${event.node}: ${finalLat}, ${finalLng}`);
+          
           const eventRes = await fetch(`${SN_INSTANCE}/api/now/table/em_event`, {
             method: 'POST',
             headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
@@ -127,6 +120,7 @@ export async function runHealthMonitoringAgentMapFlow(
           })
           const eventResult = await eventRes.json()
 
+          // Send to ArcGIS - ensuring first param is Longitude (X) and second is Latitude (Y)
           const arcgisFid = await syncAddFlagToArcGIS(finalLng, finalLat)
 
           newEventsForState.push({
@@ -141,44 +135,18 @@ export async function runHealthMonitoringAgentMapFlow(
         }
       }
     }
-
-    console.log('Updating map with new flags:', newEventsForState)
-    if (newEventsForState.length > 0) {
-      createEvents(newEventsForState)
-    }
+    if (newEventsForState.length > 0) createEvents(newEventsForState)
   } catch (error) {
     console.error('Health Agent Error:', error)
-    newEventsForState = []
   } finally {
     setCreating(false)
     console.groupEnd()
   }
 
+  // Top up logic... (keep existing deficit code)
   const deficit = MAP_CREATE_EVENT_FLAG_COUNT - newEventsForState.length
-  if (deficit > 0) {
-    if (eventCandidates.length > 0) {
-      if (newEventsForState.length === 0) {
-        console.info(
-          '[Map events] Health path added no events; adding random test flags to reach 5 on the map.',
-        )
-      } else {
-        console.info(
-          `[Map events] Topping up with ${deficit} random flag(s) to reach ${MAP_CREATE_EVENT_FLAG_COUNT} per click.`,
-        )
-      }
-      await addRandomMapEventsToArcgis(
-        eventCandidates,
-        createEvents,
-        setCreating,
-        onArcgisMutationComplete,
-        deficit,
-      )
-    } else {
-      console.warn(
-        '[Map events] Cannot top up: no point candidates in funding data; open events in app may be < 5.',
-      )
-      onArcgisMutationComplete?.()
-    }
+  if (deficit > 0 && eventCandidates.length > 0) {
+    await addRandomMapEventsToArcgis(eventCandidates, createEvents, setCreating, onArcgisMutationComplete, deficit)
   } else {
     onArcgisMutationComplete?.()
   }

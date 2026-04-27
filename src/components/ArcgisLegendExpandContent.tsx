@@ -26,14 +26,14 @@ export function ArcgisLegendExpandContent({ view }: ArcgisLegendExpandContentPro
 
   // TOC order: top map layer first (reverse of map.layers draw order)
   const layersToc = useMemo(
-    () => view.map.layers.toArray().slice().reverse(),
+    () => view.map?.layers.toArray().slice().reverse(),
     [view, bump],
   )
 
   useEffect(() => {
     const handle = reactiveUtils.watch(
       () =>
-        view.map.layers
+        view.map?.layers
           .toArray()
           .map((l) => `${layerKey(l)}:${l.visible}:${l.title ?? ''}`)
           .join('|'),
@@ -46,7 +46,7 @@ export function ArcgisLegendExpandContent({ view }: ArcgisLegendExpandContentPro
     const el = legendHostRef.current
     if (!el) return
 
-    const layerInfos = view.map.layers.toArray().map((layer) => ({
+    const layerInfos = view.map?.layers.toArray().map((layer) => ({
       layer,
       title: layer.title ?? '',
     }))
